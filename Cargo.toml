@@ -15,6 +15,7 @@ neofiglet = "0.1.*"
 parse_datetime = "0.5.*"
 serde = { version = "1.0.*", features = ["derive"] }
 serde_json = "1.0.107"
+zenoh = "0.10.0-rc"
 
 [dependencies.rhai]
 version = "1.16.*"
