@@ -32,18 +32,35 @@ pub fn run(c: &cmd::Cli, p: &cmd::Put, zc: Config)  {
                                 cmd::TelemetryType::Log => format!("zbus/log/{}/{}/{}", &c.protocol_version, &p.source, &p.key)
                             };
                             log::debug!("Telemetry key is: {}", &key);
-                            match payload::generate_payload(*tsn, key.clone(), &p.value) {
-                                Some(data) => {
-                                    log::debug!("Generated payload: {:?}", &data);
-                                    match session.put(&key, data.clone()).encoding(KnownEncoding::AppJson).res() {
-                                        Ok(_) => {}
-                                        Err(err) => {
-                                            log::error!("Telemetry submission for key {} failed: {:?}", &key, err);
+                            if p.raw_value {
+                                match payload::generate_raw_payload(*tsn, key.clone(), &p.value) {
+                                    Some(data) => {
+                                        log::debug!("Generated payload: {:?}", &data);
+                                        match session.put(&key, data.clone()).encoding(KnownEncoding::AppJson).res() {
+                                            Ok(_) => {}
+                                            Err(err) => {
+                                                log::error!("Telemetry submission for key {} failed: {:?}", &key, err);
+                                            }
                                         }
                                     }
+                                    None => {
+                                        log::error!("Data generation return an empty result")
+                                    }
                                 }
-                                None => {
-                                    log::error!("Data generation return an empty result")
+                            } else {
+                                match payload::generate_payload(*tsn, key.clone(), &p.value) {
+                                    Some(data) => {
+                                        log::debug!("Generated payload: {:?}", &data);
+                                        match session.put(&key, data.clone()).encoding(KnownEncoding::AppJson).res() {
+                                            Ok(_) => {}
+                                            Err(err) => {
+                                                log::error!("Telemetry submission for key {} failed: {:?}", &key, err);
+                                            }
+                                        }
+                                    }
+                                    None => {
+                                        log::error!("Data generation return an empty result")
+                                    }
                                 }
                             }
                             let _ = session.close();

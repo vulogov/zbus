@@ -146,6 +146,9 @@ pub struct Put {
     #[clap(help="Telemetry value", long, default_value_t = String::from(""))]
     pub value: String,
 
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Pass the value as-is without computation")]
+    pub raw_value: bool,
+
     #[clap(last = true)]
     args: Vec<String>,
 }

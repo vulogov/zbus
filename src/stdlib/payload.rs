@@ -1,5 +1,8 @@
 extern crate log;
 use rhai::{Engine, Dynamic};
+use rhai::packages::Package;
+use rhai_sci::SciPackage;
+use rhai_rand::RandomPackage;
 use serde::{Serialize};
 use serde_json;
 
@@ -26,7 +29,9 @@ struct TelemetryPayloadFloat {
 
 pub fn generate_payload(timestamp: i64, key: String, v: &String) -> Option<String> {
 
-    let engine = Engine::new();
+    let mut engine = Engine::new();
+    engine.register_global_module(SciPackage::new().as_shared_module());
+    engine.register_global_module(RandomPackage::new().as_shared_module());
     match engine.eval_expression::<Dynamic>(&v) {
         Ok(val) => {
             match val.type_name() {
@@ -48,4 +53,8 @@ pub fn generate_payload(timestamp: i64, key: String, v: &String) -> Option<Strin
         }
     }
     None
+}
+
+pub fn generate_raw_payload(timestamp: i64, key: String, v: &String) -> Option<String> {
+    return Some(serde_json::to_string(&TelemetryPayloadString {ts: timestamp, key: key, value: v.clone()}).unwrap())
 }

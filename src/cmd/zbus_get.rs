@@ -33,7 +33,6 @@ pub fn run(c: &cmd::Cli, p: &cmd::Get, zc: Config)  {
                                 let slices = &sample.value.payload.contiguous();
                                 match std::str::from_utf8(slices) {
                                     Ok(data) => {
-                                        // serde_json::from_str(&data);
                                         match serde_json::from_str::<serde_json::Value>(&data) {
                                             Ok(zjson) => {
                                                 println!("{}", &zjson.to_string());
