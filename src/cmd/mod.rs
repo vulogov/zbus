@@ -20,9 +20,9 @@ pub fn init() {
     setloglevel::setloglevel(&cli);
     stdlib::initlib(&cli);
     match &cli.command {
-        Commands::Put(_zput) => {
+        Commands::Put(zput) => {
             log::debug!("Set single metric to the bus");
-            zbus_put::run(&cli);
+            zbus_put::run(&cli, &zput);
         }
         Commands::Get(_zget) => {
             log::debug!("Get single metric from the bus");
@@ -65,7 +65,19 @@ enum Commands {
 
 #[derive(Args, Clone, Debug)]
 #[clap(about="Put single telemetry value to the bus")]
-struct Put {
+pub struct Put {
+    #[clap(help="Timestamp", long, default_value_t = String::from("now"))]
+    pub timestamp: String,
+
+    #[clap(help="Telemetry source", long, default_value_t = String::from(hostname::get().unwrap().into_string().unwrap()))]
+    pub source: String,
+
+    #[clap(help="Telemetry key", long, default_value_t = String::from_utf8(vec![]).unwrap())]
+    pub key: String,
+
+    #[clap(help="Telemetry value", long, default_value_t = String::from(""))]
+    pub value: String,
+
     #[clap(last = true)]
     args: Vec<String>,
 }
