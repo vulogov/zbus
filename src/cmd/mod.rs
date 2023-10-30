@@ -69,9 +69,9 @@ pub fn init() {
             log::debug!("Set single metric to the bus");
             zbus_put::run(&cli, &zput, config.clone());
         }
-        Commands::Get(_zget) => {
+        Commands::Get(zget) => {
             log::debug!("Get single metric from the bus");
-            zbus_get::run(&cli);
+            zbus_get::run(&cli, &zget, config.clone());
         }
         Commands::Subscribe(_zsub) => {
             log::debug!("Subscribe to the metrics");
@@ -152,7 +152,16 @@ pub struct Put {
 
 #[derive(Args, Clone, Debug)]
 #[clap(about="Get single telemetry value from the bus")]
-struct Get {
+pub struct Get {
+    #[clap(help="Telemetry source", long, default_value_t = String::from(hostname::get().unwrap().into_string().unwrap()))]
+    pub source: String,
+
+    #[clap(long, value_enum, default_value_t = TelemetryType::Metric, help="Telemetry type")]
+    pub telemetry_type: TelemetryType,
+
+    #[clap(help="Telemetry key", long, default_value_t = String::from_utf8(vec![]).unwrap())]
+    pub key: String,
+
     #[clap(last = true)]
     args: Vec<String>,
 }

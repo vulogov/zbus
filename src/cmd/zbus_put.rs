@@ -35,7 +35,7 @@ pub fn run(c: &cmd::Cli, p: &cmd::Put, zc: Config)  {
                             match payload::generate_payload(*tsn, key.clone(), &p.value) {
                                 Some(data) => {
                                     log::debug!("Generated payload: {:?}", &data);
-                                    match session.put(&key, data.clone()).res() {
+                                    match session.put(&key, data.clone()).encoding(KnownEncoding::AppJson).res() {
                                         Ok(_) => {}
                                         Err(err) => {
                                             log::error!("Telemetry submission for key {} failed: {:?}", &key, err);
