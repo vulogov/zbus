@@ -73,11 +73,11 @@ pub fn init() {
             log::debug!("Get single metric from the bus");
             zbus_get::run(&cli, &zget, config.clone());
         }
-        Commands::Subscribe(_zsub) => {
+        Commands::Subscribe(zsub) => {
             log::debug!("Subscribe to the metrics");
-            zbus_subscribe::run(&cli);
+            zbus_subscribe::run(&cli, &zsub, config.clone());
         }
-        Commands::Version(_version) => {
+        Commands::Version(_) => {
             log::debug!("Get the tool version");
             zbus_version::run(&cli);
         }
@@ -171,7 +171,13 @@ pub struct Get {
 
 #[derive(Args, Clone, Debug)]
 #[clap(about="Subscribe to the telemetry on the bus")]
-struct Subscribe {
+pub struct Subscribe {
+    #[clap(long, value_enum, default_value_t = TelemetryType::Metric, help="Telemetry type")]
+    pub telemetry_type: TelemetryType,
+
+    #[clap(help="Telemetry key", long, default_value_t = String::from_utf8(vec![]).unwrap())]
+    pub key: String,
+
     #[clap(last = true)]
     args: Vec<String>,
 }
