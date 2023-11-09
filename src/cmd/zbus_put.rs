@@ -33,7 +33,7 @@ pub fn run(c: &cmd::Cli, p: &cmd::Put, zc: Config)  {
                             };
                             log::debug!("Telemetry key is: {}", &key);
                             if p.raw_value {
-                                match payload::generate_raw_payload(*tsn, key.clone(), &p.value) {
+                                match payload::generate_raw_payload(*tsn, p.source.clone(), key.clone(), p.key.clone(), &p.value) {
                                     Some(data) => {
                                         log::debug!("Generated payload: {:?}", &data);
                                         match session.put(&key, data.clone()).encoding(KnownEncoding::AppJson).res() {
@@ -48,7 +48,7 @@ pub fn run(c: &cmd::Cli, p: &cmd::Put, zc: Config)  {
                                     }
                                 }
                             } else {
-                                match payload::generate_payload(*tsn, key.clone(), &p.value) {
+                                match payload::generate_payload(*tsn, p.source.clone(), key.clone(), p.key.clone(), &p.value) {
                                     Some(data) => {
                                         log::debug!("Generated payload: {:?}", &data);
                                         match session.put(&key, data.clone()).encoding(KnownEncoding::AppJson).res() {
