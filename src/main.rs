@@ -1,6 +1,10 @@
 pub mod cmd;
 pub mod stdlib;
 
-fn main()  {
+#[cfg(feature = "tokio-runtime")]
+use tokio;
+
+#[tokio::main]
+async fn main()  {
     cmd::init();
 }
