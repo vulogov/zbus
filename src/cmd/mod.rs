@@ -13,7 +13,11 @@ pub mod setloglevel;
 pub mod zbus_get;
 pub mod zbus_put;
 pub mod zbus_subscribe;
+pub mod zbus_export;
+pub mod zbus_export_zabbix;
 pub mod zbus_version;
+pub mod platform_api;
+pub mod zabbix_api;
 
 
 pub fn init() {
@@ -77,6 +81,14 @@ pub fn init() {
             log::debug!("Subscribe to the metrics");
             zbus_subscribe::run(&cli, &zsub, config.clone());
         }
+        Commands::Export(zexp) => {
+            log::debug!("Export to ZBUS");
+            zbus_export::run(&cli, &zexp, config.clone());
+        }
+        Commands::Api(api) => {
+            log::debug!("Platform API");
+            platform_api::run(&cli, &api, config.clone());
+        }
         Commands::Version(_) => {
             log::debug!("Get the tool version");
             zbus_version::run(&cli);
@@ -117,6 +129,8 @@ enum Commands {
     Put(Put),
     Get(Get),
     Subscribe(Subscribe),
+    Export(Export),
+    Api(Api),
     Version(Version),
 }
 
@@ -126,6 +140,17 @@ pub enum TelemetryType {
     Event,
     Trace,
     Log,
+}
+
+#[derive(Debug, Copy, Clone, ValueEnum)]
+pub enum TelemetrySources {
+    Zabbix,
+}
+
+#[derive(Subcommand, Clone, Debug)]
+enum ApiCommands {
+    Login(Login),
+    Metadata(Metadata),
 }
 
 #[derive(Args, Clone, Debug)]
@@ -183,8 +208,73 @@ pub struct Subscribe {
 }
 
 #[derive(Args, Clone, Debug)]
+#[clap(about="Export data to ZBUS")]
+pub struct Export {
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Process export files in loop")]
+    pub in_loop: bool,
+
+    #[clap(long, default_value_t = 1, help="Interval between runs")]
+    pub every: u16,
+
+    #[clap(long, value_enum, default_value_t = TelemetrySources::Zabbix, help="Telemetry source")]
+    pub source: TelemetrySources,
+
+    #[clap(help="Export files path", long, default_value_t = String::from(std::env::current_dir().unwrap().to_str().unwrap()))]
+    pub path: String,
+
+    #[clap(help="Export files search pattern", long, default_value_t = String::from(""))]
+    pub search: String,
+
+    #[clap(help="Export files extension", long, default_value_t = String::from("*"))]
+    pub extension: String,
+
+    #[clap(last = true)]
+    args: Vec<String>,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Platform API calls")]
+pub struct Api {
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Process calls in loop")]
+    pub in_loop: bool,
+
+    #[clap(long, default_value_t = 1, help="Interval between runs")]
+    pub every: u16,
+
+    #[clap(long, value_enum, default_value_t = TelemetrySources::Zabbix, help="Telemetry source")]
+    pub source: TelemetrySources,
+
+    #[clap(help="API endpoint", long, default_value_t = String::from("http://127.0.0.1:8080"))]
+    pub endpoint: String,
+
+    #[clap(subcommand)]
+    command: ApiCommands,
+}
+
+#[derive(Args, Clone, Debug)]
 #[clap(about="Get the version of the tool")]
 struct Version {
     #[clap(last = true)]
     args: Vec<String>,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Login to Api")]
+struct Login {
+    #[clap(help="Username", long, default_value_t = String::from("Admin"))]
+    pub login: String,
+
+    #[clap(help="Password", long, default_value_t = String::from("password"))]
+    pub password: String,
+
+    #[clap(last = true)]
+    args: Vec<String>,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="List of the hosts in configuration")]
+struct Metadata {
+    #[clap(help="Authentication token", long, default_value_t = String::from(""))]
+    pub token: String,
+
 }

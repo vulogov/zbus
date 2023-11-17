@@ -8,13 +8,16 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.*"
 clap = { version = "4.4.*", features = ["derive"] }
+easy_reader = "0.5.2"
 env_logger = "0.10.*"
 hostname = "0.3.*"
 log = "0.4.*"
 neofiglet = "0.1.*"
 parse_datetime = "0.5.*"
+reqwest = { version="0.11.*", features= ["blocking", "json"] }
 rhai-rand = "0.1.6"
 rhai-sci = "0.2.0"
+rust_search = "2.1.*"
 serde = { version = "1.0.*", features = ["derive"] }
 serde_json = { version="1.0.*", default-features = true }
 tokio = { version="1.34.*", features = ["full", "time"] }
