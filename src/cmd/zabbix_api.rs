@@ -2,6 +2,7 @@ extern crate log;
 use reqwest;
 use serde_json;
 use crate::cmd;
+use crate::cmd::zabbix_lib;
 use crate::cmd::{Login, Metadata};
 use zenoh::config::{Config};
 
@@ -51,7 +52,7 @@ fn zabbix_api_metadata(api: &cmd::Api, meta: &Metadata) -> Option<Vec<serde_json
                     "method": "item.get",
                     "id": 1,
                     "params": {
-
+                        "templated": false,
                     }
                 }))
                 .send() {
@@ -106,11 +107,18 @@ pub fn run(_c: &cmd::Cli, api: &cmd::Api, _zc: Config)  {
             match zabbix_api_metadata(api, &metadata) {
                 Some(res) => {
                     for v in res {
-                        println!("{} {} {}",
-                            &v["hostid"].as_str().expect("string expected").to_string(),
-                            &v["itemid"].as_str().expect("string expected").to_string(),
-                            &v["key_"].as_str().expect("string expected").to_string()
-                        );
+                        let hostid = &v["hostid"].as_str().expect("string expected").to_string();
+                        let itemid = &v["itemid"].as_str().expect("string expected").to_string();
+                        match zabbix_lib::zabbix_key_to_zenoh((&hostid).to_string(), (&itemid).to_string(), (&v["key_"].as_str().expect("string expected")).to_string()) {
+                            Some(key) => {
+                                println!("{} {} {}",
+                                    &hostid,
+                                    &itemid,
+                                    key
+                                );
+                            }
+                            None => continue,
+                        }
                     }
                 }
                 None => {

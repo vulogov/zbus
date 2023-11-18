@@ -18,6 +18,7 @@ pub mod zbus_export_zabbix;
 pub mod zbus_version;
 pub mod platform_api;
 pub mod zabbix_api;
+pub mod zabbix_lib;
 
 
 pub fn init() {
