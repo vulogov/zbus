@@ -276,6 +276,9 @@ struct Login {
 #[clap(about="List of the hosts in configuration")]
 struct Metadata {
     #[clap(help="Authentication token", long, default_value_t = String::from(""))]
+
     pub token: String,
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Sync metadata to ZBUS")]
+    pub sync_zbus: bool,
 
 }

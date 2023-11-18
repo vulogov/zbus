@@ -13,12 +13,20 @@ enum ZabbixKeyToken {
 }
 
 pub fn zabbix_key_to_zenoh(hostid: String, itemid: String, key: String) -> Option<String> {
+    log::trace!("Parsing: {:?}", &key);
     let mut res = String::from(format!("zbus/metadata/v1/{}/{}", hostid, itemid).to_string());
     let mut lex = ZabbixKeyToken::lexer(&key);
     loop {
         match lex.next() {
             Some(Ok(ZabbixKeyToken::Ident)) => {
-                res = [res, "/".to_string(), (&lex.slice()).to_string()].join("");
+                let mut val = (&lex.slice()).to_string();
+                log::trace!("Got ident: {:?}", &val);
+                if val.is_empty() {
+                    val = "_".to_string();
+                } else {
+                    val = val.replace("/", "\\");
+                }
+                res = [res, "/".to_string(), val].join("");
             }
             Some(Ok(ZabbixKeyToken::Lenc)) => {
                 break;
@@ -28,7 +36,9 @@ pub fn zabbix_key_to_zenoh(hostid: String, itemid: String, key: String) -> Optio
                 return None;
             }
             None => break,
-            _ => continue,
+            Some(Ok(something)) => {
+                log::trace!("Got something: {:?} {:?}", something, (&lex.slice()).to_string());
+            }
         }
     }
     Some(res)
