@@ -12,9 +12,18 @@ enum ZabbixKeyToken {
     Lenc,
 }
 
-pub fn zabbix_key_to_zenoh(hostid: String, itemid: String, key: String) -> Option<String> {
+pub fn zabbix_key_to_zenoh_meta(hostid: String, itemid: String, key: String) -> Option<String> {
+    match zabbix_key_to_zenoh(key.clone()) {
+        Some(zkey) => {
+            return Some(format!("zbus/metadata/v1/{}/{}{}", hostid, itemid, zkey).to_string());
+        }
+        None => return None,
+    }
+}
+
+pub fn zabbix_key_to_zenoh(key: String) -> Option<String> {
     log::trace!("Parsing: {:?}", &key);
-    let mut res = String::from(format!("zbus/metadata/v1/{}/{}", hostid, itemid).to_string());
+    let mut res = String::from("".to_string());
     let mut lex = ZabbixKeyToken::lexer(&key);
     loop {
         match lex.next() {

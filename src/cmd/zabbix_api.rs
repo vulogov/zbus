@@ -6,6 +6,8 @@ use crate::cmd::zabbix_lib;
 use crate::cmd::{Login, Metadata};
 use zenoh::config::{Config};
 use zenoh::prelude::sync::*;
+use crate::cmd::zenoh_lib;
+
 
 fn zabbix_api_login(api: &cmd::Api, login: &Login) -> Option<String> {
     match reqwest::blocking::Client::new()
@@ -113,7 +115,7 @@ pub fn run(_c: &cmd::Cli, api: &cmd::Api, zc: Config)  {
                                 for v in res {
                                     let hostid = &v["hostid"].as_str().expect("string expected").to_string();
                                     let itemid = &v["itemid"].as_str().expect("string expected").to_string();
-                                    match zabbix_lib::zabbix_key_to_zenoh((&hostid).to_string(), (&itemid).to_string(), (&v["key_"].as_str().expect("string expected")).to_string()) {
+                                    match zabbix_lib::zabbix_key_to_zenoh_meta((&hostid).to_string(), (&itemid).to_string(), (&v["key_"].as_str().expect("string expected")).to_string()) {
                                         Some(key) => {
                                             println!("{} {} {}",
                                                 &hostid,
@@ -122,12 +124,9 @@ pub fn run(_c: &cmd::Cli, api: &cmd::Api, zc: Config)  {
                                             );
                                             if metadata.sync_zbus {
                                                 let payload = &v.to_string();
-                                                match session.put(&key, payload.clone()).encoding(KnownEncoding::AppJson).res() {
-                                                    Ok(_) => {}
-                                                    Err(err) => {
-                                                        log::error!("Metadata submission for key {} failed: {:?}", &key, err);
-                                                    }
-                                                }
+                                                zenoh_lib::zenoh_put(key.clone(), payload.clone(), &session);
+                                                let rkey = format!("zbus/metadata/v1/{}/{}", &hostid, &itemid);
+                                                zenoh_lib::zenoh_put(rkey.clone(), payload.clone(), &session);
                                             }
                                         }
                                         None => continue,

@@ -19,6 +19,7 @@ pub mod zbus_version;
 pub mod platform_api;
 pub mod zabbix_api;
 pub mod zabbix_lib;
+pub mod zenoh_lib;
 
 
 pub fn init() {
