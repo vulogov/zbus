@@ -16,6 +16,8 @@ pub mod zbus_subscribe;
 pub mod zbus_export;
 pub mod zbus_export_zabbix;
 pub mod zbus_version;
+pub mod zbus_query;
+pub mod zbus_query_raw;
 pub mod platform_api;
 pub mod zabbix_api;
 pub mod zabbix_lib;
@@ -91,6 +93,10 @@ pub fn init() {
             log::debug!("Platform API");
             platform_api::run(&cli, &api, config.clone());
         }
+        Commands::Query(query) => {
+            log::debug!("Query ZBUS");
+            zbus_query::run(&cli, &query, config.clone());
+        }
         Commands::Version(_) => {
             log::debug!("Get the tool version");
             zbus_version::run(&cli);
@@ -133,6 +139,7 @@ enum Commands {
     Subscribe(Subscribe),
     Export(Export),
     Api(Api),
+    Query(Query),
     Version(Version),
 }
 
@@ -153,6 +160,11 @@ pub enum TelemetrySources {
 enum ApiCommands {
     Login(Login),
     Metadata(Metadata),
+}
+
+#[derive(Subcommand, Clone, Debug)]
+enum QueryCommands {
+    QueryRaw(QueryRaw),
 }
 
 #[derive(Args, Clone, Debug)]
@@ -277,9 +289,26 @@ struct Login {
 #[clap(about="List of the hosts in configuration")]
 struct Metadata {
     #[clap(help="Authentication token", long, default_value_t = String::from(""))]
-
     pub token: String,
+
     #[clap(long, action = clap::ArgAction::SetTrue, help="Sync metadata to ZBUS")]
     pub sync_zbus: bool,
 
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Platform API calls")]
+pub struct Query {
+    #[clap(subcommand)]
+    command: QueryCommands,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Query metadata stored on ZBUS")]
+pub struct QueryRaw {
+    #[clap(help="ZBUS key", long, default_value_t = String::from("zbus/*"))]
+    pub key: String,
+
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Receive all matched elements")]
+    pub all: bool,
 }
