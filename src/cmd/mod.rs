@@ -18,6 +18,7 @@ pub mod zbus_export_zabbix;
 pub mod zbus_version;
 pub mod zbus_query;
 pub mod zbus_query_raw;
+pub mod zbus_query_metadata;
 pub mod platform_api;
 pub mod zabbix_api;
 pub mod zabbix_lib;
@@ -165,6 +166,7 @@ enum ApiCommands {
 #[derive(Subcommand, Clone, Debug)]
 enum QueryCommands {
     QueryRaw(QueryRaw),
+    QueryMetadata(QueryMetadata),
 }
 
 #[derive(Args, Clone, Debug)]
@@ -304,11 +306,24 @@ pub struct Query {
 }
 
 #[derive(Args, Clone, Debug)]
-#[clap(about="Query metadata stored on ZBUS")]
+#[clap(about="Query data stored on ZBUS")]
 pub struct QueryRaw {
     #[clap(help="ZBUS key", long, default_value_t = String::from("zbus/*"))]
     pub key: String,
 
     #[clap(long, action = clap::ArgAction::SetTrue, help="Receive all matched elements")]
     pub all: bool,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Query metadata stored on ZBUS")]
+pub struct QueryMetadata {
+    #[clap(help="Host ID", long, default_value_t = String::from("zbus/*"))]
+    pub hostid: String,
+
+    #[clap(help="Item ID", long, default_value_t = String::from("zbus/*"))]
+    pub itemid: String,
+
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Convert key to ZENOH key format")]
+    pub convert: bool,
 }

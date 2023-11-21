@@ -29,7 +29,14 @@ pub fn run(_c: &cmd::Cli, exp: &cmd::Export, zc: Config)  {
                                         loop {
                                             match reader.next_line() {
                                                 Ok(Some(line)) => {
-                                                    println!("{}", &line);
+                                                    match serde_json::from_str::<serde_json::Value>(&line) {
+                                                        Ok(zjson) => {
+                                                            println!("{}", &zjson.to_string().as_str());
+                                                        }
+                                                        Err(err) => {
+                                                            log::error!("Error while converting JSON data from ZENOH bus: {:?}", err);
+                                                        }
+                                                    }
                                                 }
                                                 Ok(None) => break,
                                                 _ => break,
