@@ -11,10 +11,15 @@ fn convert_zabbix_export_payload_to_zbus(key: String, platform: String, payload:
     match cmd::zabbix_lib::zabbix_key_to_zenoh(key.clone()) {
         Some(zkey) => {
             let timestamp = unit_conversions::time::seconds::to_nanoseconds(payload["clock"].as_f64().unwrap()) + payload["ns"].as_f64().unwrap();
+            let mut host = payload["host"]["host"].to_string();
+            if host.chars().nth(0) == Some('\"') {
+                host = (&host[1..host.len() - 1]).to_string();
+                log::debug!("Host is: {}", &host);
+            }
             return Some(serde_json::json!({
                 "ts": timestamp as u64,
                 "platform": platform,
-                "src": payload["host"]["host"],
+                "src": host,
                 "skey": key,
                 "key": zkey,
                 "value": payload["value"],
@@ -50,15 +55,17 @@ pub fn run(c: &cmd::Cli, exp: &cmd::Export, zc: Config)  {
                                                 Ok(Some(line)) => {
                                                     match serde_json::from_str::<serde_json::Value>(&line) {
                                                         Ok(zjson) => {
-                                                            // log::trace!("Looking for {} {}", &zjson["hostid"], &zjson["itemid"]);
-                                                            log::trace!("{}", &zjson.to_string().as_str());
                                                             match cmd::zenoh_lib::get_key_from_metadata(c.platform_name.clone(), "*".to_string(), zjson["itemid"].to_string(), &session) {
                                                                 Some(key) => {
                                                                     match convert_zabbix_export_payload_to_zbus(key, c.platform_name.clone(), zjson.clone()) {
                                                                         Some(payload) => {
-                                                                            let store_key = match zjson["type"].as_int() {
-                                                                                2 => format!("log/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, payload["src"].to_string(), payload["key"].to_string().as_str()),
-                                                                                _ => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, payload["src"].to_string(), payload["key"].to_string().as_str()),
+                                                                            let store_key = match zjson["type"].as_i64() {
+                                                                                Some(2) => format!("log/metric/{}/{}/{}{}", &c.protocol_version, &c.platform_name, &payload["src"].as_str().unwrap(), &payload["key"].as_str().unwrap()),
+                                                                                _ => format!("zbus/metric/{}/{}/{}{}", &c.protocol_version, &c.platform_name, &payload["src"].as_str().unwrap(), &payload["key"].as_str().unwrap()),
+                                                                            };
+                                                                            match session.put(store_key.clone(), payload.clone()).encoding(KnownEncoding::AppJson).res() {
+                                                                                Ok(_) => log::debug!("ZBX->ZBUS: {}", &store_key),
+                                                                                Err(err) => log::error!("Error ingesting {} {:?}: {:?}", &payload["key"], &payload, err),
                                                                             }
                                                                         }
                                                                         None => continue,
