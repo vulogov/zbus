@@ -90,7 +90,7 @@ fn zabbix_api_metadata(api: &cmd::Api, meta: &Metadata) -> Option<Vec<serde_json
     None
 }
 
-pub fn run(_c: &cmd::Cli, api: &cmd::Api, zc: Config)  {
+pub fn run(c: &cmd::Cli, api: &cmd::Api, zc: Config)  {
     log::trace!("zabbix_api::run() reached");
     loop {
         match &api.command {
@@ -115,9 +115,10 @@ pub fn run(_c: &cmd::Cli, api: &cmd::Api, zc: Config)  {
                                 for v in res {
                                     let hostid = &v["hostid"].as_str().expect("string expected").to_string();
                                     let itemid = &v["itemid"].as_str().expect("string expected").to_string();
-                                    match zabbix_lib::zabbix_key_to_zenoh_meta((&hostid).to_string(), (&itemid).to_string(), (&v["key_"].as_str().expect("string expected")).to_string()) {
+                                    match zabbix_lib::zabbix_key_to_zenoh_meta(c.platform_name.clone(), (&hostid).to_string(), (&itemid).to_string(), (&v["key_"].as_str().expect("string expected")).to_string()) {
                                         Some(key) => {
-                                            println!("{} {} {}",
+                                            println!("{} {} {} {}",
+                                                &c.platform_name,
                                                 &hostid,
                                                 &itemid,
                                                 key
@@ -125,7 +126,7 @@ pub fn run(_c: &cmd::Cli, api: &cmd::Api, zc: Config)  {
                                             if metadata.sync_zbus {
                                                 let payload = &v.to_string();
                                                 zenoh_lib::zenoh_put(key.clone(), payload.clone(), &session);
-                                                let rkey = format!("zbus/metadata/v1/{}/{}", &hostid, &itemid);
+                                                let rkey = format!("zbus/metadata/v1/{}/{}/{}", &c.platform_name, &hostid, &itemid);
                                                 zenoh_lib::zenoh_put(rkey.clone(), payload.clone(), &session);
                                             }
                                         }

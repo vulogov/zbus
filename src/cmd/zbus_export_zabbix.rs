@@ -5,8 +5,27 @@ use zenoh::config::{Config};
 use zenoh::prelude::sync::*;
 use easy_reader::EasyReader;
 use std::fs::File;
+use unit_conversions;
 
-pub fn run(_c: &cmd::Cli, exp: &cmd::Export, zc: Config)  {
+fn convert_zabbix_export_payload_to_zbus(key: String, platform: String, payload: serde_json::Value) -> Option<serde_json::Value> {
+    match cmd::zabbix_lib::zabbix_key_to_zenoh(key.clone()) {
+        Some(zkey) => {
+            let timestamp = unit_conversions::time::seconds::to_nanoseconds(payload["clock"].as_f64().unwrap()) + payload["ns"].as_f64().unwrap();
+            return Some(serde_json::json!({
+                "ts": timestamp as u64,
+                "platform": platform,
+                "src": payload["host"]["host"],
+                "skey": key,
+                "key": zkey,
+                "value": payload["value"],
+                "name": payload["name"],
+            }));
+        }
+        None => return None,
+    }
+}
+
+pub fn run(c: &cmd::Cli, exp: &cmd::Export, zc: Config)  {
     log::trace!("zbus_export_zabbix::run() reached");
     match zenoh::open(zc).res() {
         Ok(session) => {
@@ -31,7 +50,22 @@ pub fn run(_c: &cmd::Cli, exp: &cmd::Export, zc: Config)  {
                                                 Ok(Some(line)) => {
                                                     match serde_json::from_str::<serde_json::Value>(&line) {
                                                         Ok(zjson) => {
-                                                            println!("{}", &zjson.to_string().as_str());
+                                                            // log::trace!("Looking for {} {}", &zjson["hostid"], &zjson["itemid"]);
+                                                            log::trace!("{}", &zjson.to_string().as_str());
+                                                            match cmd::zenoh_lib::get_key_from_metadata(c.platform_name.clone(), "*".to_string(), zjson["itemid"].to_string(), &session) {
+                                                                Some(key) => {
+                                                                    match convert_zabbix_export_payload_to_zbus(key, c.platform_name.clone(), zjson.clone()) {
+                                                                        Some(payload) => {
+                                                                            let store_key = match zjson["type"].as_int() {
+                                                                                2 => format!("log/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, payload["src"].to_string(), payload["key"].to_string().as_str()),
+                                                                                _ => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, payload["src"].to_string(), payload["key"].to_string().as_str()),
+                                                                            }
+                                                                        }
+                                                                        None => continue,
+                                                                    }
+                                                                }
+                                                                None => continue,
+                                                            }
                                                         }
                                                         Err(err) => {
                                                             log::error!("Error while converting JSON data from ZENOH bus: {:?}", err);

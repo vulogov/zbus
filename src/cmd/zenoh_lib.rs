@@ -2,8 +2,8 @@ extern crate log;
 use serde_json;
 use zenoh::prelude::sync::*;
 
-pub fn get_key_from_metadata(hostid: String, itemid: String, session: &Session) -> Option<String> {
-    match zenoh_get_first(format!("zbus/metadata/v1/{}/{}", hostid, itemid).to_string(), session) {
+pub fn get_key_from_metadata(platform: String, hostid: String, itemid: String, session: &Session) -> Option<String> {
+    match zenoh_get_first(format!("zbus/metadata/v1/{}/{}/{}", platform, hostid, itemid).to_string(), session) {
         Some(mdata) => {
             match mdata.get("key_") {
                 Some(key) => return Some(key.as_str()?.to_string()),

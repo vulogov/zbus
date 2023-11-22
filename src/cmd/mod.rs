@@ -117,6 +117,9 @@ pub struct Cli {
     #[clap(help="ZBUS telemetry protocol version", long, default_value_t = String::from("v1"))]
     pub protocol_version: String,
 
+    #[clap(help="ID of the observability platform", long, default_value_t = String::from("local"))]
+    pub platform_name: String,
+
     #[clap(help="ZENOH bus address", long, default_value_t = String::from(env::var("ZBUS_ADDRESS").unwrap_or("tcp/127.0.0.1:7447".to_string())))]
     pub bus: String,
 

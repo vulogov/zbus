@@ -26,14 +26,14 @@ pub fn run(c: &cmd::Cli, p: &cmd::Put, zc: Config)  {
                         Ok(session) => {
                             log::debug!("Connection to ZENOH bus succesful");
                             let key = match p.telemetry_type {
-                                cmd::TelemetryType::Metric => format!("zbus/metric/{}/{}/{}", &c.protocol_version, &p.source, &p.key),
-                                cmd::TelemetryType::Event => format!("zbus/event/{}/{}/{}", &c.protocol_version, &p.source, &p.key),
-                                cmd::TelemetryType::Trace => format!("zbus/trace/{}/{}/{}", &c.protocol_version, &p.source, &p.key),
-                                cmd::TelemetryType::Log => format!("zbus/log/{}/{}/{}", &c.protocol_version, &p.source, &p.key)
+                                cmd::TelemetryType::Metric => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &p.source, &p.key),
+                                cmd::TelemetryType::Event => format!("zbus/event/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &p.source, &p.key),
+                                cmd::TelemetryType::Trace => format!("zbus/trace/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &p.source, &p.key),
+                                cmd::TelemetryType::Log => format!("zbus/log/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &p.source, &p.key)
                             };
                             log::debug!("Telemetry key is: {}", &key);
                             if p.raw_value {
-                                match payload::generate_raw_payload(*tsn, p.source.clone(), key.clone(), p.key.clone(), &p.value) {
+                                match payload::generate_raw_payload(*tsn, c.platform_name.clone(), p.source.clone(), key.clone(), p.key.clone(), &p.value) {
                                     Some(data) => {
                                         log::debug!("Generated payload: {:?}", &data);
                                         match session.put(&key, data.clone()).encoding(KnownEncoding::AppJson).res() {
@@ -48,7 +48,7 @@ pub fn run(c: &cmd::Cli, p: &cmd::Put, zc: Config)  {
                                     }
                                 }
                             } else {
-                                match payload::generate_payload(*tsn, p.source.clone(), key.clone(), p.key.clone(), &p.value) {
+                                match payload::generate_payload(*tsn, c.platform_name.clone(), p.source.clone(), key.clone(), p.key.clone(), &p.value) {
                                     Some(data) => {
                                         log::debug!("Generated payload: {:?}", &data);
                                         match session.put(&key, data.clone()).encoding(KnownEncoding::AppJson).res() {

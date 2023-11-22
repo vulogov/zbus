@@ -12,10 +12,10 @@ enum ZabbixKeyToken {
     Lenc,
 }
 
-pub fn zabbix_key_to_zenoh_meta(hostid: String, itemid: String, key: String) -> Option<String> {
+pub fn zabbix_key_to_zenoh_meta(platform: String, hostid: String, itemid: String, key: String) -> Option<String> {
     match zabbix_key_to_zenoh(key.clone()) {
         Some(zkey) => {
-            return Some(format!("zbus/metadata/v1/{}/{}{}", hostid, itemid, zkey).to_string());
+            return Some(format!("zbus/metadata/v1/{}/{}/{}{}", platform, hostid, itemid, zkey).to_string());
         }
         None => return None,
     }
