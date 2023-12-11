@@ -172,6 +172,12 @@ enum QueryCommands {
     QueryMetadata(QueryMetadata),
 }
 
+#[derive(Subcommand, Clone, Debug)]
+enum ExportCommands {
+    History(History),
+    Sla(Sla),
+}
+
 #[derive(Args, Clone, Debug)]
 #[clap(about="Put single telemetry value to the bus")]
 pub struct Put {
@@ -229,26 +235,8 @@ pub struct Subscribe {
 #[derive(Args, Clone, Debug)]
 #[clap(about="Export data to ZBUS")]
 pub struct Export {
-    #[clap(long, action = clap::ArgAction::SetTrue, help="Process export files in loop")]
-    pub in_loop: bool,
-
-    #[clap(long, default_value_t = 1, help="Interval between runs")]
-    pub every: u16,
-
-    #[clap(long, value_enum, default_value_t = TelemetrySources::Zabbix, help="Telemetry source")]
-    pub source: TelemetrySources,
-
-    #[clap(help="Export files path", long, default_value_t = String::from(std::env::current_dir().unwrap().to_str().unwrap()))]
-    pub path: String,
-
-    #[clap(help="Export files search pattern", long, default_value_t = String::from(""))]
-    pub search: String,
-
-    #[clap(help="Export files extension", long, default_value_t = String::from("*"))]
-    pub extension: String,
-
-    #[clap(last = true)]
-    args: Vec<String>,
+    #[clap(subcommand)]
+    command: ExportCommands,
 }
 
 #[derive(Args, Clone, Debug)]
@@ -299,6 +287,34 @@ struct Metadata {
     #[clap(long, action = clap::ArgAction::SetTrue, help="Sync metadata to ZBUS")]
     pub sync_zbus: bool,
 
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Export SLA data to ZBUS")]
+pub struct Sla {
+
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Export History data to ZBUS")]
+pub struct History {
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Process export files in loop")]
+    pub in_loop: bool,
+
+    #[clap(long, default_value_t = 1, help="Interval between runs")]
+    pub every: u16,
+
+    #[clap(long, value_enum, default_value_t = TelemetrySources::Zabbix, help="Telemetry source")]
+    pub source: TelemetrySources,
+
+    #[clap(help="Export files path", long, default_value_t = String::from(std::env::current_dir().unwrap().to_str().unwrap()))]
+    pub path: String,
+
+    #[clap(help="Export files search pattern", long, default_value_t = String::from(""))]
+    pub search: String,
+
+    #[clap(help="Export files extension", long, default_value_t = String::from("*"))]
+    pub extension: String,
 }
 
 #[derive(Args, Clone, Debug)]

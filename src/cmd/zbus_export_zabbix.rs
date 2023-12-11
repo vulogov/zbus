@@ -30,7 +30,7 @@ fn convert_zabbix_export_payload_to_zbus(key: String, platform: String, payload:
     }
 }
 
-pub fn run(c: &cmd::Cli, exp: &cmd::Export, zc: Config)  {
+pub fn run(c: &cmd::Cli, exp: &cmd::History, zc: Config)  {
     log::trace!("zbus_export_zabbix::run() reached");
     match zenoh::open(zc).res() {
         Ok(session) => {
