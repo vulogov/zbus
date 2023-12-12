@@ -19,5 +19,12 @@ pub fn run(c: &cmd::Cli, exp: &cmd::Export, zc: Config)  {
                 }
             }
         }
+        cmd::ExportCommands::Events(events) => {
+            match events.source {
+                cmd::TelemetrySources::Zabbix => {
+                    cmd::zbus_export_events_zabbix::run(c, events, zc.clone());
+                }
+            }
+        }
     }
 }

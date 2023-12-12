@@ -16,6 +16,7 @@ pub mod zbus_subscribe;
 pub mod zbus_export;
 pub mod zbus_export_zabbix;
 pub mod zbus_export_sla_zabbix;
+pub mod zbus_export_events_zabbix;
 pub mod zbus_version;
 pub mod zbus_query;
 pub mod zbus_query_raw;
@@ -177,6 +178,7 @@ enum QueryCommands {
 enum ExportCommands {
     History(History),
     Sla(Sla),
+    Events(Events),
 }
 
 #[derive(Args, Clone, Debug)]
@@ -312,6 +314,28 @@ pub struct Sla {
 #[derive(Args, Clone, Debug)]
 #[clap(about="Export History data to ZBUS")]
 pub struct History {
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Process export files in loop")]
+    pub in_loop: bool,
+
+    #[clap(long, default_value_t = 1, help="Interval between runs")]
+    pub every: u16,
+
+    #[clap(long, value_enum, default_value_t = TelemetrySources::Zabbix, help="Telemetry source")]
+    pub source: TelemetrySources,
+
+    #[clap(help="Export files path", long, default_value_t = String::from(std::env::current_dir().unwrap().to_str().unwrap()))]
+    pub path: String,
+
+    #[clap(help="Export files search pattern", long, default_value_t = String::from(""))]
+    pub search: String,
+
+    #[clap(help="Export files extension", long, default_value_t = String::from("*"))]
+    pub extension: String,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Export Events data to ZBUS")]
+pub struct Events {
     #[clap(long, action = clap::ArgAction::SetTrue, help="Process export files in loop")]
     pub in_loop: bool,
 
