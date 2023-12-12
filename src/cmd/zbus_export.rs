@@ -12,7 +12,12 @@ pub fn run(c: &cmd::Cli, exp: &cmd::Export, zc: Config)  {
                 }
             }
         }
-        cmd::ExportCommands::Sla(_sla) => {
+        cmd::ExportCommands::Sla(sla) => {
+            match sla.source {
+                cmd::TelemetrySources::Zabbix => {
+                    cmd::zbus_export_sla_zabbix::run(c, sla, zc.clone());
+                }
+            }
         }
     }
 }

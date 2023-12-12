@@ -15,6 +15,7 @@ pub mod zbus_put;
 pub mod zbus_subscribe;
 pub mod zbus_export;
 pub mod zbus_export_zabbix;
+pub mod zbus_export_sla_zabbix;
 pub mod zbus_version;
 pub mod zbus_query;
 pub mod zbus_query_raw;
@@ -292,7 +293,20 @@ struct Metadata {
 #[derive(Args, Clone, Debug)]
 #[clap(about="Export SLA data to ZBUS")]
 pub struct Sla {
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Process export files in loop")]
+    pub in_loop: bool,
 
+    #[clap(long, default_value_t = 1, help="Interval between runs")]
+    pub every: u16,
+
+    #[clap(long, value_enum, default_value_t = TelemetrySources::Zabbix, help="Telemetry source")]
+    pub source: TelemetrySources,
+
+    #[clap(help="Authentication token", long, default_value_t = String::from(""))]
+    pub token: String,
+
+    #[clap(help="API endpoint", long, default_value_t = String::from("http://127.0.0.1:8080"))]
+    pub endpoint: String,
 }
 
 #[derive(Args, Clone, Debug)]
