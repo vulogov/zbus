@@ -1,0 +1,9 @@
+let sample1 = Sampler();
+let sample2 = Sampler();
+let sample3 = Sampler();
+
+sample3.set(0.01);
+
+print(`sample1 == sample2 `+ sample1.equal(sample2));
+print(`sample1 == sample3 `+ sample1.equal(sample3));
+print(`sample1 ~= sample3 `+ sample1.equal(sample3, 0.011));

@@ -1,0 +1,6 @@
+let sampler = Sampler();
+
+for i in 1..129 {
+  sampler.set(i);
+  print("sample= "+i+" , tsf="+sampler.tsf_next());
+}

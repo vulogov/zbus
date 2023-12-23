@@ -1,0 +1,8 @@
+let sample = Sampler();
+
+for i in 1..128 {
+  sample.set(rand_float(1.0, 100.0));
+}
+print(`Original data = `+sample.normalize().get());
+print(`SMMA smoothing = `+sample.smooth().normalize().get());
+print(`EMA smoothing = `+sample.exp_smooth().normalize().get());

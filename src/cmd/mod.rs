@@ -394,6 +394,9 @@ pub struct QueryMetadata {
 #[derive(Args, Clone, Debug)]
 #[clap(about="Run ZBUS script. All arguments passed after -- will be passed to script")]
 pub struct Script {
+    #[clap(help="API endpoint", long, default_value_t = String::from("http://127.0.0.1:8080"))]
+    pub endpoint: String,
+
     #[clap(long, action = clap::ArgAction::SetTrue, help="Take script from STDIN")]
     pub stdin: bool,
 
@@ -407,5 +410,5 @@ pub struct Script {
     pub eval: String,
 
     #[clap(last = true)]
-    args: Vec<String>,
+    pub args: Vec<String>,
 }

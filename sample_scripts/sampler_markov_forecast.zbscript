@@ -1,0 +1,6 @@
+let sample = sampler::Sawtooth(4, 0.0, 1.0, 1);
+
+let forecast = sample.markov();
+
+print("Original data= "+sample.get());
+print("Forecast= "+forecast);

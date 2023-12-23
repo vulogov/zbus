@@ -1,0 +1,7 @@
+let sampler = Sampler();
+
+for i in 1..129 {
+  let v = rand_float(0.0, 3.0);
+  sampler.set(v);
+  print(i+". sample= "+v+" , tsf="+sampler.tsf_next()+" , oscillator= "+sampler.oscillator());
+}

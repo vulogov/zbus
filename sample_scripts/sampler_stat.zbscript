@@ -1,0 +1,17 @@
+let sample = Sampler();
+
+for i in 1..128 {
+  sample.set(rand_float(1.0, 100.0));
+}
+print(`Max value= `+max(sample.get()));
+print(`Min value= `+min(sample.get()));
+print(`Sum of values= `+sum(sample.get()));
+print(`Mean of values= `+mean(sample.get()));
+print(`Prod of values= `+prod(sample.get()));
+print(`Variance = `+variance(sample.get()));
+print(`Standard deviation = `+std(sample.get()));
+print(`Median = `+median(sample.get()));
+print(`Absolute deviation = `+mad(sample.get()));
+print(`Percentile 95 = `+prctile(sample.get(), 95));
+print(`Inter-quantile range = `+iqr(sample.get()));
+print(`Mode = `+mode(sample.get()));

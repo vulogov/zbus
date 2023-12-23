@@ -1,0 +1,11 @@
+let sample = Sampler();
+
+fn echo(x, y) {
+  return y;
+}
+
+for i in 1..128 {
+  sample.set(rand_float(1.0, 100.0));
+}
+
+print(sampler::zip(sample, echo));
