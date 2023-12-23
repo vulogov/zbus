@@ -19,6 +19,7 @@ pub mod zbus_export_sla_zabbix;
 pub mod zbus_export_events_zabbix;
 pub mod zbus_version;
 pub mod zbus_query;
+pub mod zbus_script;
 pub mod zbus_query_raw;
 pub mod zbus_query_metadata;
 pub mod platform_api;
@@ -100,6 +101,10 @@ pub fn init() {
             log::debug!("Query ZBUS");
             zbus_query::run(&cli, &query, config.clone());
         }
+        Commands::Script(script) => {
+            log::debug!("Run script");
+            zbus_script::run(&cli, &script, config.clone());
+        }
         Commands::Version(_) => {
             log::debug!("Get the tool version");
             zbus_version::run(&cli);
@@ -146,6 +151,7 @@ enum Commands {
     Export(Export),
     Api(Api),
     Query(Query),
+    Script(Script),
     Version(Version),
 }
 
@@ -383,4 +389,23 @@ pub struct QueryMetadata {
 
     #[clap(long, action = clap::ArgAction::SetTrue, help="Convert key to ZENOH key format")]
     pub convert: bool,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Run ZBUS script. All arguments passed after -- will be passed to script")]
+pub struct Script {
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Take script from STDIN")]
+    pub stdin: bool,
+
+    #[clap(help="File with Script", long, default_value_t = String::from(""))]
+    pub file: String,
+
+    #[clap(help="URI with Script", long, default_value_t = String::from(""))]
+    pub uri: String,
+
+    #[clap(help="Eval script snippet passed through command line", long, default_value_t = String::from(""))]
+    pub eval: String,
+
+    #[clap(last = true)]
+    args: Vec<String>,
 }
