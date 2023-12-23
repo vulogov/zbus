@@ -1,0 +1,5 @@
+fn print_data(d) {
+  print(d);
+}
+
+input::distribution::binomial(0.5, 10, print_data, 1000);

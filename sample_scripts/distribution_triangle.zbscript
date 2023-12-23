@@ -1,0 +1,8 @@
+fn print_data(d) {
+  print(d);
+  //let metric = Metric("answer", d);
+  //metric["instanceId"] = "TestInstance";
+  //let send_res = metric.send("metric-api.newrelic.com", system::env("NEWRELIC_INSERTKEY"));
+}
+
+input::distribution::triangle(3, 3, 0.0, 1.0, 1, print_data, 1000);

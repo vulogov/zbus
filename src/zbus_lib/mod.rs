@@ -12,6 +12,8 @@ pub mod json;
 pub mod zbus_log;
 pub mod timestamp;
 pub mod sampler;
+pub mod input;
+pub mod system;
 
 pub fn run_zbus_script(script: String, c: &cmd::Cli, s: &cmd::Script) {
     log::trace!("Execiting ZBUS script len()={}", &script.len());
@@ -49,4 +51,6 @@ pub fn initlib(engine: &mut Engine)  {
     zbus_log::init(engine);
     timestamp::init(engine);
     sampler::init(engine);
+    system::init(engine);
+    input::init(engine);
 }

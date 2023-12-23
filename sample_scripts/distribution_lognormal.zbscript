@@ -1,0 +1,5 @@
+fn print_data(d) {
+  print(d);
+}
+
+input::distribution::lognormal(0.0, 1.0, print_data, 1000);

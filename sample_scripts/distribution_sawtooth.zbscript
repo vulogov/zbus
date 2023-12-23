@@ -1,0 +1,28 @@
+//
+// Function send_data() will be called for every sampled Value
+// that is passed as parameter to the function
+//
+fn send_data(d) {
+  // Function will prind the passed value on stdout
+  print(d);
+  // Create New Relic metric with name "answer"
+  let metric = Metric("answer", d);
+  // instanceId for this metric will be the value that is passed
+  // as --name parameter of "tsak" program
+  // or by default generated as hostname@"alphanumeric random sequence"
+  metric["instanceId"] = newrelic::INSTANCE;
+  // Then se sending this metric to a New Relic Metric API frontend
+  // the address of API frontend could be passed through --nr-metric parameter
+  // New Relic ingenst key could be passed ether through --nr-insert-key
+  // or NR_INSERT_KEY environment variable
+  let send_res = metric.send(newrelic::NR_METRIC, newrelic::NR_INSERT_KEY);
+}
+
+// Call sawtooth sequence generation with parameters:
+// perios     - 4
+// low value  - 0.0
+// high value - 1.0
+// delay      - 1
+// Calling function send_data() for every sampled value
+// and sampling the distribution every 5000 milliseconds (5 seconds)
+input::distribution::sawtooth(4, 0.0, 1.0, 1, send_data, 10000);
