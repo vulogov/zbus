@@ -258,7 +258,7 @@ pub fn init(engine: &mut Engine) {
     module.set_native_fn("zip", zip::sampler_zip);
     module.set_native_fn("Sampler", construct::sampler_construct);
     module.set_native_fn("Normal", distributions::create_normal_dist);
-    module.set_native_fn("Uniform", distributions::create_uniform_normalized_dist);
+    module.set_native_fn("Uniform_normalized", distributions::create_uniform_normalized_dist);
     module.set_native_fn("Uniform", distributions::create_uniform_dist);
     module.set_native_fn("Exponential", distributions::create_exponential_dist);
     module.set_native_fn("Binomial", distributions::create_binomial_dist);
