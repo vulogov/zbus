@@ -8,6 +8,11 @@ let status = bus.put("zbus/metric/v1/local/home.lan/pi", #{
     platform: "local",
     skey:     "pi",
     src:      "home.lan",
-    ts:1702077425285763000,
-    value:3.1401}
+    ts:       1702077425285763000,
+    value:    3.1401
+  }
 );
+print("Bus()::put() status is "+status);
+let result = bus.get("zbus/metric/v1/local/home.lan/pi");
+print("Bus()::get() returns"+result);
+print("Bus()::get() for non-existing value returns "+bus.get("zbus/metric/v1/local/home.lan/key_not_exists"))

@@ -91,6 +91,52 @@ impl Bus {
         }
         return false;
     }
+    pub fn get(self: &mut Bus, key: String) -> Map {
+        match zenoh::open(self.zc.clone()).res() {
+            Ok(session) => {
+                log::debug!("Bus({}) session established", self.address());
+                match session.get(&key).res() {
+                    Ok(replies) => {
+                        while let Ok(reply) = replies.recv() {
+                            match reply.sample {
+                                Ok(sample) => {
+                                    let slices = &sample.value.payload.contiguous();
+                                    match std::str::from_utf8(slices) {
+                                        Ok(data) => {
+                                            match serde_json::from_str::<Map>(&data) {
+                                                Ok(mut zjson) => {
+                                                    let _ = zjson.insert("__valid".into(), true.into());
+                                                    return zjson;
+                                                }
+                                                Err(err) => {
+                                                    log::error!("Error while converting JSON data from ZENOH bus: {:?}", err);
+                                                }
+                                            }
+                                        }
+                                        Err(err) => {
+                                            log::error!("Error while extracting data from ZENOH bus: {:?}", err);
+                                        }
+                                    }
+                                }
+                                Err(err) => {
+                                    log::error!("Error while getting data from ZENOH bus: {:?}", err);
+                                }
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        log::error!("Bus()::get() for {} failed: {:?}", &key, err);
+                    }
+                }
+            }
+            Err(err) => {
+                log::error!("Error opening Bus() session: {:?}", err);
+            }
+        }
+        let mut res = Map::default();
+        let _ = res.insert("__valid".into(), false.into());
+        return res;
+    }
 }
 
 
@@ -105,6 +151,7 @@ pub fn init(engine: &mut Engine) {
           .register_fn("state", Bus::state)
           .register_fn("address", Bus::address)
           .register_fn("put", Bus::put)
+          .register_fn("get", Bus::get)
           .register_fn("to_string", |x: &mut Bus| format!("{:?}", x) );
     let module = exported_module!(bus_module);
     engine.register_static_module("bus", module.into());
