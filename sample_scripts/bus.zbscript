@@ -1,0 +1,13 @@
+print("Testing BUS service to "+ZBUS_ADDRESS);
+let bus = Bus(ZBUS_ADDRESS);
+print(bus);
+print("Bus instance status "+bus.state());
+print("Connected to "+bus.address());
+let status = bus.put("zbus/metric/v1/local/home.lan/pi", #{
+    key:      "zbus/metric/v1/local/home.lan/pi",
+    platform: "local",
+    skey:     "pi",
+    src:      "home.lan",
+    ts:1702077425285763000,
+    value:3.1401}
+);

@@ -8,6 +8,7 @@ use rhai_fs::FilesystemPackage;
 use rhai_url::UrlPackage;
 use rhai_ml::MLPackage;
 
+pub mod bus;
 pub mod json;
 pub mod zbus_log;
 pub mod timestamp;
@@ -35,7 +36,14 @@ pub fn run_zbus_script(script: String, c: &cmd::Cli, s: &cmd::Script) {
          .push("API_ENDPOINT", Dynamic::from(s.endpoint.clone()));
     initscope(&mut scope);
     initlib(&mut engine);
-    let _ = engine.run_with_scope(&mut scope, script.as_str());
+    match engine.run_with_scope(&mut scope, script.as_str()) {
+        Ok(res) => {
+            log::debug!("Script returned: {:?}", res);
+        }
+        Err(err) => {
+            log::error!("Script returned error: {:?}", err);
+        }
+    }
     drop(scope);
     drop(engine);
 }
@@ -47,6 +55,7 @@ pub fn initscope(scope: &mut Scope) {
 
 pub fn initlib(engine: &mut Engine)  {
     log::debug!("Initializing ZBUS RHAI library");
+    bus::init(engine);
     json::init(engine);
     zbus_log::init(engine);
     timestamp::init(engine);
