@@ -1,6 +1,6 @@
 extern crate log;
 use std::str::FromStr;
-use rhai::{Engine, Map};
+use rhai::{Engine, Map, EvalAltResult};
 use rhai::plugin::*;
 use zenoh::config::{Config, ConnectConfig, EndPoint, WhatAmI};
 use zenoh::prelude::sync::*;
@@ -91,7 +91,7 @@ impl Bus {
         }
         return false;
     }
-    pub fn get(self: &mut Bus, key: String) -> Map {
+    pub fn get(self: &mut Bus, key: String) -> Result<Map, Box<EvalAltResult>> {
         match zenoh::open(self.zc.clone()).res() {
             Ok(session) => {
                 log::debug!("Bus({}) session established", self.address());
@@ -106,36 +106,39 @@ impl Bus {
                                             match serde_json::from_str::<Map>(&data) {
                                                 Ok(mut zjson) => {
                                                     let _ = zjson.insert("__valid".into(), true.into());
-                                                    return zjson;
+                                                    return Ok(zjson);
                                                 }
                                                 Err(err) => {
                                                     log::error!("Error while converting JSON data from ZENOH bus: {:?}", err);
+                                                    return Err(format!("Error while converting JSON data from ZENOH bus: {:?}", err).into());
                                                 }
                                             }
                                         }
                                         Err(err) => {
                                             log::error!("Error while extracting data from ZENOH bus: {:?}", err);
+                                            return Err(format!("Error while extracting data from ZENOH bus: {:?}", err).into());
                                         }
                                     }
                                 }
                                 Err(err) => {
                                     log::error!("Error while getting data from ZENOH bus: {:?}", err);
+                                    return Err(format!("Error while getting data from ZENOH bus: {:?}", err).into());
                                 }
                             }
                         }
                     }
                     Err(err) => {
                         log::error!("Bus()::get() for {} failed: {:?}", &key, err);
+                        return Err(format!("Bus()::get() for {} failed: {:?}", &key, err).into());
                     }
                 }
             }
             Err(err) => {
                 log::error!("Error opening Bus() session: {:?}", err);
+                return Err(format!("Error opening Bus() session: {:?}", err).into());
             }
         }
-        let mut res = Map::default();
-        let _ = res.insert("__valid".into(), false.into());
-        return res;
+        return Err(format!("Bus()::get() key not found: {}", &key).into());
     }
 }
 

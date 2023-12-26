@@ -15,4 +15,9 @@ let status = bus.put("zbus/metric/v1/local/home.lan/pi", #{
 print("Bus()::put() status is "+status);
 let result = bus.get("zbus/metric/v1/local/home.lan/pi");
 print("Bus()::get() returns"+result);
-print("Bus()::get() for non-existing value returns "+bus.get("zbus/metric/v1/local/home.lan/key_not_exists"))
+try {
+    print("Bus()::get() for non-existing value returns "+bus.get("zbus/metric/v1/local/home.lan/key_not_exists"))
+}
+catch(err) {
+    print("Error has been detected: "+err);
+}
