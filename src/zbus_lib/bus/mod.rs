@@ -5,6 +5,8 @@ use rhai::plugin::*;
 use zenoh::config::{Config, ConnectConfig, EndPoint, WhatAmI};
 use zenoh::prelude::sync::*;
 
+use crate::zbus_lib::sampler;
+
 #[derive(Debug, Clone)]
 pub struct Bus {
     state:      bool,
@@ -91,6 +93,7 @@ impl Bus {
         }
         return false;
     }
+
     pub fn get(self: &mut Bus, key: String) -> Result<Map, Box<EvalAltResult>> {
         match zenoh::open(self.zc.clone()).res() {
             Ok(session) => {
@@ -140,6 +143,45 @@ impl Bus {
         }
         return Err(format!("Bus()::get() key not found: {}", &key).into());
     }
+
+    pub fn feed(self: &mut Bus, key: String, mut s: sampler::Sampler) -> Result<sampler::Sampler, Box<EvalAltResult>> {
+        match self.get(key.clone()) {
+            Ok(value) => {
+                match value.get("value") {
+                    Some(v) => {
+                        match value.get("ts") {
+                            Some(ts) => {
+                                if ts.is_int() {
+                                    match s.set_and_ts(v.clone(), ts.as_int().unwrap() as f64) {
+                                        Ok(_) => return Ok(s),
+                                        Err(err) => {
+                                            log::error!("Bus()::feed() issue for {}: {:?}", &key, err);
+                                            return Err(format!("Bus()::feed() issue for {}: {:?}", &key, err).into());
+                                        }
+                                    }
+                                } else {
+                                    log::error!("Bus()::feed() timestamp issue for {}", &key);
+                                    return Err(format!("Bus()::feed() timestamp issue for {}", &key).into());
+                                }
+                            }
+                            None => {
+                                log::error!("Bus()::feed() timestamp issue for {}", &key);
+                                return Err(format!("Bus()::feed() timestamp issue for {}", &key).into());
+                            }
+                        }
+                    }
+                    None => {
+                        log::error!("Bus()::feed() value issue for {}", &key);
+                        return Err(format!("Bus()::feed() value issue for {}", &key).into());
+                    }
+                }
+            }
+            Err(err) => {
+                log::error!("Bus()::feed() issue for {}: {:?}", &key, err);
+                return Err(format!("Bus()::feed() issue for {}: {:?}", &key, err).into());
+            }
+        }
+    }
 }
 
 
@@ -155,6 +197,7 @@ pub fn init(engine: &mut Engine) {
           .register_fn("address", Bus::address)
           .register_fn("put", Bus::put)
           .register_fn("get", Bus::get)
+          .register_fn("feed", Bus::feed)
           .register_fn("to_string", |x: &mut Bus| format!("{:?}", x) );
     let module = exported_module!(bus_module);
     engine.register_static_module("bus", module.into());

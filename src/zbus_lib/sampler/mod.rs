@@ -61,7 +61,7 @@ impl Sampler {
 
     fn try_set_ts(self: &mut Sampler, ts: f64) {
         if self.s.len() == self.s.capacity() {
-            let _ = self.d.pop_front();
+            let _ = self.s.pop_front();
         }
         let _ = self.s.push_back(ts);
     }
@@ -109,7 +109,7 @@ impl Sampler {
         }
         Err("Value for the Sampler must be numeric".into())
     }
-    fn set_and_ts(self: &mut Sampler, v: Dynamic, ts: f64) -> Result<Dynamic, Box<EvalAltResult>> {
+    pub fn set_and_ts(self: &mut Sampler, v: Dynamic, ts: f64) -> Result<Dynamic, Box<EvalAltResult>> {
         if v.is_float() {
             self.try_set(v.clone_cast::<f64>());
             self.try_set_ts(ts);
@@ -237,6 +237,7 @@ pub fn init(engine: &mut Engine) {
           .register_fn("Sampler", Sampler::init)
           .register_fn("set", Sampler::set)
           .register_fn("set", Sampler::set_and_ts)
+          .register_fn("raw", Sampler::raw)
           .register_fn("get", Sampler::get)
           .register_fn("xy", Sampler::get_xy)
           .register_fn("tsf_next", Sampler::tsf_next)

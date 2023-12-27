@@ -1,0 +1,19 @@
+let data = Sampler();
+let bus = Bus(ZBUS_ADDRESS);
+print("Bus instance status "+bus.state());
+print("Connected to "+bus.address());
+let status = bus.put("zbus/metric/v1/local/home.lan/pi", #{
+    key:      "zbus/metric/v1/local/home.lan/pi",
+    platform: "local",
+    skey:     "pi",
+    src:      "home.lan",
+    ts:       1702077425285763000,
+    value:    3.1401
+  }
+);
+print("Bus()::put() status is "+status);
+let data = bus.feed("zbus/metric/v1/local/home.lan/pi", data);
+let values = data.get();
+print("Bus()::feed() max "+max(values));
+print("Bus()::feed() min "+min(values));
+print("Bus()::feed() sum must be 3.1401 and it is "+sum(values));
