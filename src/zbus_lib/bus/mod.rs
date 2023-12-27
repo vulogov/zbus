@@ -182,6 +182,95 @@ impl Bus {
             }
         }
     }
+
+    pub fn collect_n_values(self: &mut Bus, key: String, n: i64) -> Result<sampler::Sampler, Box<EvalAltResult>> {
+        let mut ret_data = sampler::Sampler::init();
+        match zenoh::open(self.zc.clone()).res() {
+            Ok(session) => {
+                let mut c: i64 = 0_i64;
+                match session.declare_subscriber(&key).res() {
+                    Ok(subscriber) => {
+                        while c < n {
+                            match subscriber.recv() {
+                                Ok(sample) => {
+                                    let slices = &sample.value.payload.contiguous();
+                                    match std::str::from_utf8(slices) {
+                                        Ok(data) => {
+                                            match serde_json::from_str::<serde_json::Value>(&data) {
+                                                Ok(zjson) => {
+                                                    match zjson.get("value") {
+                                                        Some(v) => {
+                                                            match zjson.get("ts") {
+                                                                Some(ts) => {
+                                                                    if ts.is_i64() {
+                                                                        match v.as_f64() {
+                                                                            Some(v_n) => {
+                                                                                match ret_data.set_and_ts(Dynamic::from(v_n), ts.as_i64().unwrap() as f64) {
+                                                                                    Ok(_) => {
+                                                                                        c += 1;
+                                                                                    },
+                                                                                    Err(err) => {
+                                                                                        log::error!("Bus()::feed() issue for {}: {:?}", &key, err);
+                                                                                        return Err(format!("Bus()::feed() issue for {}: {:?}", &key, err).into());
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            None => {
+                                                                                log::error!("Bus()::feed() issue for {}: Value must be numeric", &key);
+                                                                                return Err(format!("Bus()::feed() issue for {}: Value must be numeric", &key).into());
+                                                                            }
+                                                                        }
+                                                                    } else {
+                                                                        log::error!("Bus()::feed() timestamp issue for {}", &key);
+                                                                        return Err(format!("Bus()::feed() timestamp issue for {}", &key).into());
+                                                                    }
+                                                                }
+                                                                None => {
+                                                                    log::error!("Bus()::feed() timestamp issue for {}", &key);
+                                                                    return Err(format!("Bus()::feed() timestamp issue for {}", &key).into());
+                                                                }
+                                                            }
+                                                        }
+                                                        None => {
+                                                            log::error!("Bus()::collect() value issue for {}", &key);
+                                                        }
+                                                    }
+                                                }
+                                                Err(err) => {
+                                                    log::error!("Error while converting JSON data from ZENOH bus: {:?}", err);
+                                                }
+                                            }
+                                        }
+                                        Err(err) => {
+                                            log::error!("Error while extracting data from ZENOH bus: {:?}", err);
+                                        }
+                                    }
+                                }
+                                Err(err) => {
+                                    log::error!("Bus()::recv() problem: {:?}", err);
+                                }
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        log::error!("Error subscribing to Bus(): {:?}", err);
+                        return Err(format!("Error subscribing to Bus(): {:?}", err).into());
+                    }
+                }
+                let _ = session.close();
+                log::debug!("Connection to ZENOH bus is closed");
+            }
+            Err(err) => {
+                log::error!("Error opening Bus() session: {:?}", err);
+                return Err(format!("Error opening Bus() session: {:?}", err).into());
+            }
+        }
+        Ok(ret_data)
+    }
+
+    pub fn collect(self: &mut Bus, key: String) -> Result<sampler::Sampler, Box<EvalAltResult>> {
+        self.collect_n_values(key, 128)
+    }
 }
 
 
@@ -198,6 +287,8 @@ pub fn init(engine: &mut Engine) {
           .register_fn("put", Bus::put)
           .register_fn("get", Bus::get)
           .register_fn("feed", Bus::feed)
+          .register_fn("collect", Bus::collect)
+          .register_fn("collect_n_values", Bus::collect_n_values)
           .register_fn("to_string", |x: &mut Bus| format!("{:?}", x) );
     let module = exported_module!(bus_module);
     engine.register_static_module("bus", module.into());
