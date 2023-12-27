@@ -151,8 +151,8 @@ impl Bus {
                     Some(v) => {
                         match value.get("ts") {
                             Some(ts) => {
-                                if ts.is_int() {
-                                    match s.set_and_ts(v.clone(), ts.as_int().unwrap() as f64) {
+                                if ts.is_float() {
+                                    match s.set_and_ts(v.clone(), ts.as_float().unwrap() as f64) {
                                         Ok(_) => return Ok(s),
                                         Err(err) => {
                                             log::error!("Bus()::feed() issue for {}: {:?}", &key, err);
@@ -271,6 +271,32 @@ impl Bus {
     pub fn collect(self: &mut Bus, key: String) -> Result<sampler::Sampler, Box<EvalAltResult>> {
         self.collect_n_values(key, 128)
     }
+
+    pub fn send(self: &mut Bus, key: String, mut data: sampler::Sampler) -> Result<i64, Box<EvalAltResult>> {
+        let parsed_key: Vec<&str> = key.as_str().split("/").collect();
+        let skey = &parsed_key[&parsed_key.len() - 1];
+        let src = &parsed_key[&parsed_key.len() - 2];
+        let platform = &parsed_key[&parsed_key.len() - 3];
+        let mut c: i64 = 0_i64;
+        for v in data.values().unwrap() {
+            let ts  = &v.clone().cast::<Vec<Dynamic>>()[0];
+            let val = &v.clone().cast::<Vec<Dynamic>>()[1];
+            if ts.as_float().unwrap() != 0.0 {
+                let zjson = serde_json::json!({
+                    "skey":         skey,
+                    "src":          src,
+                    "platform":     platform,
+                    "key":          key,
+                    "ts":           ts.as_float().unwrap(),
+                    "value":        val.as_float().unwrap(),
+                });
+                let zdata: Map = rhai::serde::to_dynamic(zjson).unwrap().cast::<Map>();
+                self.put(key.clone(), zdata);
+                c += 1;
+            }
+        }
+        Ok(c)
+    }
 }
 
 
@@ -287,6 +313,7 @@ pub fn init(engine: &mut Engine) {
           .register_fn("put", Bus::put)
           .register_fn("get", Bus::get)
           .register_fn("feed", Bus::feed)
+          .register_fn("send", Bus::send)
           .register_fn("collect", Bus::collect)
           .register_fn("collect_n_values", Bus::collect_n_values)
           .register_fn("to_string", |x: &mut Bus| format!("{:?}", x) );

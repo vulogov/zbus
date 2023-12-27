@@ -4,7 +4,7 @@ use rhai::plugin::*;
 
 use crate::zbus_lib::sampler::tsf::TSF;
 use crate::zbus_lib::sampler::forecast_oscillator::FOSC;
-use crate::zbus_lib::timestamp::timestamp_module::timestamp_ms;
+use crate::zbus_lib::timestamp::timestamp_module::{timestamp_ns};
 use crate::stdlib::traits::Indicator;
 use lexical_core;
 use std::collections::VecDeque;
@@ -48,15 +48,14 @@ impl Sampler {
         res
     }
     fn zero(self: &mut Sampler) {
-        let ts = timestamp_ms();
         for _ in 1..129 {
             self.try_set(0.0 as f64);
-            self.try_set_ts(ts);
+            self.try_set_ts(0.0);
         }
     }
 
     fn try_set_current_ts(self: &mut Sampler) {
-        self.try_set_ts(timestamp_ms())
+        self.try_set_ts(timestamp_ns())
     }
 
     fn try_set_ts(self: &mut Sampler, ts: f64) {
@@ -166,6 +165,18 @@ impl Sampler {
             Err(err) => return Err(err),
         }
     }
+    pub fn values(self: &mut Sampler) -> Result<Vec<Dynamic>, Box<EvalAltResult>> {
+        let mut res: Array = Array::new();
+        for i in 0..128 {
+            match self.get_xy(i) {
+                Ok(v) => {
+                    res.push(v);
+                }
+                Err(_) => {}
+            }
+        }
+        Ok(res)
+    }
     pub fn raw(self: &mut Sampler) -> Vec<f64> {
         let mut res: Vec<f64> = Vec::new();
         for v in &self.d {
@@ -240,6 +251,7 @@ pub fn init(engine: &mut Engine) {
           .register_fn("raw", Sampler::raw)
           .register_fn("get", Sampler::get)
           .register_fn("xy", Sampler::get_xy)
+          .register_fn("values", Sampler::values)
           .register_fn("tsf_next", Sampler::tsf_next)
           .register_fn("oscillator", Sampler::oscillator)
           .register_fn("downsample", Sampler::downsample)
