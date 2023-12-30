@@ -12,6 +12,7 @@ pub mod bus;
 pub mod json;
 pub mod zbus_log;
 pub mod timestamp;
+pub mod neuralnet;
 pub mod sampler;
 pub mod input;
 pub mod system;
@@ -62,4 +63,5 @@ pub fn initlib(engine: &mut Engine)  {
     sampler::init(engine);
     system::init(engine);
     input::init(engine);
+    neuralnet::init(engine);
 }

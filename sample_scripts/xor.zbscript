@@ -1,0 +1,10 @@
+let nn = NeuralNet(2,3,1);
+nn.add([0.0, 0.0], [0.0]);
+nn.add([0.0, 1.0], [1.0]);
+nn.add([1.0, 0.0], [1.0]);
+nn.add([1.0, 1.0], [0.0]);
+nn.train();
+let res1 = nn.forward([0.0, 0.0]);
+let res2 = nn.forward([1.0, 0.0]);
+print(`0 XOR 0 is likely ${res1}`);
+print(`1 XOR 0 is likely ${res2}`);
