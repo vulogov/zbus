@@ -146,6 +146,20 @@ impl Sampler {
         }
         Dynamic::from(res)
     }
+    pub fn data(self: &mut Sampler) -> Dynamic {
+        let mut res = Array::new();
+        for i in 0..128 {
+            match self.try_get_xy(i) {
+                Ok((x,y)) => {
+                    if x != 0.0 {
+                        res.push(Dynamic::from(y));
+                    }
+                }
+                Err(_) => {}
+            }
+        }
+        Dynamic::from(res)
+    }
     pub fn try_get_xy(self: &mut Sampler, i: i64) -> Result<(f64, f64), Box<EvalAltResult>> {
         if (i < 0) || (i > 127) {
             return Err("Sampler.get() out of bound".into());
@@ -250,6 +264,7 @@ pub fn init(engine: &mut Engine) {
           .register_fn("set", Sampler::set_and_ts)
           .register_fn("raw", Sampler::raw)
           .register_fn("get", Sampler::get)
+          .register_fn("data", Sampler::data)
           .register_fn("xy", Sampler::get_xy)
           .register_fn("values", Sampler::values)
           .register_fn("tsf_next", Sampler::tsf_next)

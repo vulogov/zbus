@@ -3,7 +3,7 @@ let bus = Bus(ZBUS_ADDRESS);
 print("Bus instance status "+bus.state());
 print("Connected to "+bus.address());
 let data = bus.collect_n_values("zbus/metric/v1/local/home.lan/test", 3);
-let values = data.get();
+let values = data.data();
 print("Collected values "+values);
 print("Bus()::feed() max "+max(values));
 print("Bus()::feed() min "+min(values));

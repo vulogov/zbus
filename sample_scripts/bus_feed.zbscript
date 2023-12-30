@@ -13,7 +13,8 @@ let status = bus.put("zbus/metric/v1/local/home.lan/pi", #{
 );
 print("Bus()::put() status is "+status);
 let data = bus.feed("zbus/metric/v1/local/home.lan/pi", data);
-let values = data.get();
+let values = data.data();
 print("Bus()::feed() max "+max(values));
 print("Bus()::feed() min "+min(values));
+print("Bus()::feed() mean "+mean(values));
 print("Bus()::feed() sum must be 3.1401 and it is "+sum(values));
