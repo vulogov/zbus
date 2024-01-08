@@ -234,6 +234,9 @@ pub struct Subscribe {
     #[clap(long, value_enum, default_value_t = TelemetryType::Metric, help="Telemetry type")]
     pub telemetry_type: TelemetryType,
 
+    #[clap(help="Telemetry source", long, default_value_t = String::from(hostname::get().unwrap().into_string().unwrap()))]
+    pub source: String,
+
     #[clap(help="Telemetry key", long, default_value_t = String::from_utf8(vec![]).unwrap())]
     pub key: String,
 

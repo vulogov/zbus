@@ -21,10 +21,10 @@ pub fn run(c: &cmd::Cli, s: &cmd::Subscribe, zc: Config)  {
         Ok(session) => {
             log::debug!("Connection to ZENOH bus succesful");
             let key = match s.telemetry_type {
-                cmd::TelemetryType::Metric => format!("zbus/metric/{}/{}", &c.protocol_version,  &s.key),
-                cmd::TelemetryType::Event => format!("zbus/event/{}/{}", &c.protocol_version, &s.key),
-                cmd::TelemetryType::Trace => format!("zbus/trace/{}/{}", &c.protocol_version, &s.key),
-                cmd::TelemetryType::Log => format!("zbus/log/{}/{}", &c.protocol_version, &s.key)
+                cmd::TelemetryType::Metric => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &s.source, &s.key),
+                cmd::TelemetryType::Event => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &s.source, &s.key),
+                cmd::TelemetryType::Trace => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &s.source, &s.key),
+                cmd::TelemetryType::Log => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &s.source, &s.key)
             };
             log::debug!("Telemetry key is: {}", &key);
             match session.declare_subscriber(&key)
