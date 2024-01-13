@@ -82,6 +82,7 @@ impl Sampler {
             None => self.fosc_next = v.clone(),
         }
         let _ = self.d.push_back(v);
+        self.try_set_current_ts();
     }
     fn set(self: &mut Sampler, v: Dynamic) -> Result<Dynamic, Box<EvalAltResult>> {
         if v.is_float() {
@@ -159,6 +160,20 @@ impl Sampler {
             }
         }
         Dynamic::from(res)
+    }
+    pub fn data_raw(self: &mut Sampler) -> Vec::<f64> {
+        let mut res: Vec::<f64> = Vec::new();
+        for i in 0..128 {
+            match self.try_get_xy(i) {
+                Ok((x,y)) => {
+                    if x != 0.0 {
+                        res.push(y);
+                    }
+                }
+                Err(_) => {}
+            }
+        }
+        res
     }
     pub fn try_get_xy(self: &mut Sampler, i: i64) -> Result<(f64, f64), Box<EvalAltResult>> {
         if (i < 0) || (i > 127) {

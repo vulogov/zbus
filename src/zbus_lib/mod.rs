@@ -15,6 +15,7 @@ pub mod timestamp;
 pub mod neuralnet;
 pub mod sampler;
 pub mod input;
+pub mod filters;
 pub mod system;
 
 pub fn run_zbus_script(script: String, c: &cmd::Cli, s: &cmd::Script) {
@@ -64,4 +65,5 @@ pub fn initlib(engine: &mut Engine)  {
     system::init(engine);
     input::init(engine);
     neuralnet::init(engine);
+    filters::init(engine);
 }
