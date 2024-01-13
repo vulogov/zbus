@@ -1,0 +1,7 @@
+let data = sampler::Sinusoidal(8.0, 2.0, 1.0, 5.0, 2.0, 1);
+print("Generated sinusoidal data "+data.data());
+let outcome = filter::interval::interval_fit(data, 5.0, 0.25);
+print("Let see if 5 with width 0.25 is in the interval "+filter::interval::interval_fit(data, 5.0, 0.25));
+print("Let see if 7 with width 0.25 is in the interval "+filter::interval::interval_fit(data, 7.0, 0.25));
+print("Let see if 5 with width 0.1 is in the interval "+filter::interval::interval_fit(data, 5.0, 0.1));
+print("Let see if 6 with width 0.1 is in the interval "+filter::interval::interval_fit(data, 6.0, 0.1));
