@@ -1,0 +1,16 @@
+let data = SampleInterval();
+data.interval(0.0, 0.2, "Underperforming");
+data.interval(0.2, 2.0, "Stable");
+data.interval(2.0, 10.0, "Overperforming");
+print("Interval cat filter is fitted with "+data.len()+" intervals");
+print("0.1 is falling in "+data.check(0.1)+" interval category");
+print("0.19999 is falling in "+data.check(0.19999)+" interval category");
+print("0.2 is falling in "+data.check(0.2)+" interval category");
+print("1.5 is falling in "+data.check(1.5)+" interval category");
+print("5.1 is falling in "+data.check(5.1)+" interval category");
+
+try {
+    data.check(20.0);
+} catch {
+    print("20.0 is not fit of any interval");
+}
