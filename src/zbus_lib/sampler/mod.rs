@@ -84,7 +84,7 @@ impl Sampler {
         let _ = self.d.push_back(v);
         self.try_set_current_ts();
     }
-    fn set(self: &mut Sampler, v: Dynamic) -> Result<Dynamic, Box<EvalAltResult>> {
+    pub fn set(self: &mut Sampler, v: Dynamic) -> Result<Dynamic, Box<EvalAltResult>> {
         if v.is_float() {
             self.try_set(v.clone_cast::<f64>());
             self.try_set_current_ts();

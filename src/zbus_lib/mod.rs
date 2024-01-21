@@ -17,6 +17,8 @@ pub mod sampler;
 pub mod input;
 pub mod filters;
 pub mod system;
+pub mod string;
+pub mod zabbix;
 
 pub fn run_zbus_script(script: String, c: &cmd::Cli, s: &cmd::Script) {
     log::trace!("Execiting ZBUS script len()={}", &script.len());
@@ -66,4 +68,6 @@ pub fn initlib(engine: &mut Engine)  {
     input::init(engine);
     neuralnet::init(engine);
     filters::init(engine);
+    string::init(engine);
+    zabbix::init(engine);
 }

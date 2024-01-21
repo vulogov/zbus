@@ -1,0 +1,33 @@
+let data = Sampler();
+let bus = Bus(ZBUS_ADDRESS);
+let zabbix_agent = ZabbixAgent("127.0.0.1:10050");
+loop {
+  data = zabbix_agent.get("system.cpu.load[,avg5]", data);
+  let forecast = data.markov();
+  let test_data = data.data()[-1];
+  if forecast.len() > 0 {
+    let f_next = forecast[-1];
+    if f_next != 0.0 {
+      let status1 = bus.put("zbus/metric/v1/local/home.lan/test_data", #{
+          key:      "zbus/metric/v1/local/home.lan/test_data",
+          platform: "local",
+          skey:     "test_data",
+          src:      "home.lan",
+          ts:       timestamp::timestamp_ns(),
+          value:    test_data,
+        }
+      );
+      let status2 = bus.put("zbus/metric/v1/local/home.lan/test_data_forecast", #{
+          key:      "zbus/metric/v1/local/home.lan/test_data_forecast",
+          platform: "local",
+          skey:     "test_data_forecast",
+          src:      "home.lan",
+          ts:       timestamp::timestamp_ns(),
+          value:    f_next,
+        }
+      );
+      print("Forecasting "+test_data+" to "+f_next);
+    }
+  }
+  system::sleep(2);
+}

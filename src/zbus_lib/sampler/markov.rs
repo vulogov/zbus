@@ -6,7 +6,7 @@ use markov_chain::Chain;
 
 impl Sampler {
     pub fn markov(&mut self) -> Dynamic {
-        let source = self.raw();
+        let source = self.data_raw();
         let mut dst: Vec<R64> = Vec::new();
         for v in source {
             dst.push(v.into());

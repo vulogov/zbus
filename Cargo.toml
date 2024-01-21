@@ -6,13 +6,16 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+charabia = "0.8.5"
 chrono = "0.4.*"
 clap = { version = "4.4.*", features = ["derive"] }
 curl = "0.4.44"
 decorum = "0.3.1"
+distance = "0.4.0"
 easy_reader = "0.5.2"
 env_logger = "0.10.*"
 fsio = "0.4.0"
+fuzzy-matcher = "0.3.7"
 hostname = "0.3.*"
 iset = "0.2.2"
 jsonpath-rust = "0.3.5"
@@ -42,6 +45,7 @@ sudo = "0.6.0"
 ta = "0.5.0"
 tokio = { version="1.34.*", features = ["full", "time"] }
 unit-conversions = "0.1.13"
+voca_rs = "1.15.2"
 zenoh = "0.10.0-rc"
 
 [dependencies.rhai]
