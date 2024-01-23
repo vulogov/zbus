@@ -9,6 +9,7 @@ use rhai_url::UrlPackage;
 use rhai_ml::MLPackage;
 
 pub mod bus;
+pub mod conversions;
 pub mod json;
 pub mod zbus_log;
 pub mod timestamp;
@@ -60,6 +61,7 @@ pub fn initscope(scope: &mut Scope) {
 pub fn initlib(engine: &mut Engine)  {
     log::debug!("Initializing ZBUS RHAI library");
     bus::init(engine);
+    conversions::init(engine);
     json::init(engine);
     zbus_log::init(engine);
     timestamp::init(engine);

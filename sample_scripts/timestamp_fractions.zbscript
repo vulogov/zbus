@@ -1,0 +1,4 @@
+let stamp = timestamp::timestamp_ns();
+print(`Nanosecond timestamp ${float_to_int(stamp)}`);
+print("Whole seconds "+float_to_int(timestamp::whole_seconds(stamp)));
+print("Nanoseconds "+float_to_int(timestamp::nanoseconds(stamp)));
