@@ -1,0 +1,7 @@
+fn upper(line) {
+  return str::uppercase(line);
+}
+
+let p = Text(input::url("file:///etc/protocols"));
+let res = str::zip(p, upper);
+print(res);

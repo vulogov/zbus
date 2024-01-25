@@ -1,0 +1,2 @@
+let res = input::ssh("127.0.0.1", "uname -a");
+print("ssh execution returns: "+res);

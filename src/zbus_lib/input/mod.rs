@@ -4,7 +4,11 @@ use rhai::plugin::*;
 use fsio::{file};
 use crate::stdlib::getfile;
 
+pub mod bash;
 pub mod distributions;
+pub mod url;
+pub mod socket;
+pub mod ssh;
 
 #[export_module]
 pub mod input_module {
@@ -26,6 +30,10 @@ pub fn init(engine: &mut Engine) {
     log::trace!("Running STDLIB::input init");
 
     let mut module = exported_module!(input_module);
+    module.set_native_fn("socket", socket::get_from_socket);
+    module.set_native_fn("url", url::get_from_url);
+    module.set_native_fn("bash", bash::run_bash);
+    module.set_native_fn("ssh", ssh::ssh_command);
 
     let mut dist_module = Module::new();
     dist_module.set_native_fn("normal", distributions::norm_distribution_gen);
