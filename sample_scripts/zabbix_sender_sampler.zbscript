@@ -1,0 +1,8 @@
+let data = sampler::Triangle(3, 3, 0.0, 1.0, 1);
+let sender = ZabbixSender("192.168.86.29:10051");
+let data = data.distribute_timestamps(15);
+let res = sender.send("test_host", "test_item_float2", data);
+print("Result of ZabbixSender::send() is "+res);
+// for v in data.values() {
+//   sender.send("test_host", "test_item_float2", v[0], v[1]);
+// }

@@ -6,6 +6,7 @@ use std::time::Duration;
 use std::thread;
 
 use crate::zbus_lib::sampler;
+use crate::zbus_lib::zabbix::{ZabbixError};
 
 #[derive(Debug, Clone)]
 pub struct ZabbixAgent {
@@ -44,24 +45,6 @@ impl ZabbixAgent {
             thread::sleep(Duration::from_secs(t as u64));
         }
         Ok(data)
-    }
-}
-
-#[derive(Debug)]
-pub enum ZabbixError {
-    NotSupported(String),
-}
-
-impl std::fmt::Display for ZabbixError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ZabbixError::NotSupported(e) => f.write_fmt(format_args!("ZabbixNotSupported ({})", e)),
-        }
-    }
-}
-impl std::error::Error for ZabbixError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        None
     }
 }
 

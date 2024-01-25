@@ -1,0 +1,13 @@
+let result = zabbix::zabbix_sender("192.168.86.29:10051",
+  #{
+    request: "sender data",
+    data: [
+      #{
+        host: "test_host",
+        key: "test_item",
+        value: "42",
+      }
+    ]
+  }
+);
+print("zabbix_sender result is "+result)

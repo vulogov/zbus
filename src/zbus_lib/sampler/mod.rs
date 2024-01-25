@@ -206,6 +206,18 @@ impl Sampler {
         }
         Ok(res)
     }
+    pub fn values_raw(self: &mut Sampler) -> Vec<(f64,f64)> {
+        let mut res: Vec<(f64,f64)> = Vec::new();
+        for i in 0..128 {
+            match self.try_get_xy(i) {
+                Ok(v) => {
+                    res.push(v);
+                }
+                Err(_) => {}
+            }
+        }
+        res
+    }
     pub fn raw(self: &mut Sampler) -> Vec<f64> {
         let mut res: Vec<f64> = Vec::new();
         for v in &self.d {
@@ -262,6 +274,18 @@ impl Sampler {
         }
         Dynamic::from(res)
     }
+    fn distribute_timestamps(self: &mut Sampler, t: f64, d: i64) -> Sampler {
+        let mut res = self.clone();
+        let mut nt: f64 = t - ((d as f64 * 1000000000.0) * 128.0) as f64;
+        for _ in 0..128 {
+            res.try_set_ts(nt);
+            nt = nt + (d as f64 * 1000000000.0);
+        }
+        res
+    }
+    fn distribute_from_current_timestamp(self: &mut Sampler, d: i64) -> Sampler {
+        self.distribute_timestamps(timestamp_ns(), d)
+    }
 }
 
 #[export_module]
@@ -294,6 +318,8 @@ pub fn init(engine: &mut Engine) {
           .register_fn("equal", Sampler::try_equal)
           .register_fn("harmonic", Sampler::harmonic)
           .register_fn("markov", Sampler::markov)
+          .register_fn("distribute_timestamps", Sampler::distribute_timestamps)
+          .register_fn("distribute_timestamps", Sampler::distribute_from_current_timestamp)
           .register_fn("to_string", |x: &mut Sampler| format!("{:?}", x.d) );
 
     let mut module = exported_module!(sampler_module);

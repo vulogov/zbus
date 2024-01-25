@@ -1,0 +1,3 @@
+let sender = ZabbixSender("192.168.86.29:10051");
+let result = sender.send("test_host", "test_item", 42);
+print("ZabbixSender::send() result is "+result)

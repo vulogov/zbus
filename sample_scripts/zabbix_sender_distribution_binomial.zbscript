@@ -1,0 +1,11 @@
+//
+// Function called for each generated value
+//
+fn print_data(d) {
+  let ret = ZabbixSender("192.168.86.29:10051").send("test_host", "test_item_float", d);
+}
+
+//
+// Generate telemetry values following binobiam distribution with p=0.5, n=10
+//
+input::distribution::binomial(0.5, 10, print_data, 5);
