@@ -1,0 +1,11 @@
+//
+// Define callback function which trims and returnes the passed line
+//
+fn echo(line) {
+  return str::trim(line);
+}
+//
+// Read textfile line by line backwards
+//
+let res = input::textfile::backward("/etc/protocols", echo);
+print(res);

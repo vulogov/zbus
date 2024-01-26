@@ -1,0 +1,9 @@
+let str1 = "Hello!";
+let str2 = "Hällo!";
+let str3 = "Hello world!";
+let ld = str::fuzzy::Levenshtein(str1, str1);
+print(`Levenshtein distance between ${str1} and ${str1} is ${ld}`);
+let ld = str::fuzzy::Levenshtein(str1, str2);
+print(`Levenshtein distance between ${str1} and ${str2} is ${ld}`);
+let ld = str::fuzzy::Levenshtein(str1, str3);
+print(`Levenshtein distance between ${str1} and ${str3} is ${ld}`);

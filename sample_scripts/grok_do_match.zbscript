@@ -1,0 +1,17 @@
+//
+// Create a GROK object
+//
+let g = Grok();
+
+//
+// Set pattern in GROK
+//
+g["USERNAME"] = "[a-zA-Z0-9._-]+";
+
+//
+// Match patterns using GROK matching
+//
+let data = "root is root";
+let res = g.do_match("root is root", "root is %{USERNAME}");
+print("For the data: "+data);
+print("Grok matches: "+res);
