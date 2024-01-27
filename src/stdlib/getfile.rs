@@ -24,7 +24,7 @@ pub fn get_file_from_stdin() -> String {
     user_input
 }
 
-pub fn get_file_from_uri(some_url: String) -> String {
+pub fn get_file_from_uri(some_url: String) -> Option<String>  {
     struct Collector(Vec<u8>);
 
     impl Handler for Collector {
@@ -35,20 +35,20 @@ pub fn get_file_from_uri(some_url: String) -> String {
     }
 
     let mut easy = Easy2::new(Collector(Vec::new()));
-    let _ = easy.useragent("TSAK");
+    let _ = easy.useragent("ZBUS");
     easy.get(true).unwrap();
     easy.url(&some_url).unwrap();
     match easy.perform() {
         Err(err) => {
             log::error!("Request from {} returns {}", some_url, err);
-            return "".to_string();
+            return None;
         }
         _ => {}
     }
     let contents = easy.get_ref();
-    String::from_utf8_lossy(&contents.0).to_string()
+    Some(String::from_utf8_lossy(&contents.0).to_string())
 }
 
-pub fn get_file_from_file(full_path: String) -> String {
+pub fn get_file_from_file(full_path: String) -> Option<String> {
     get_file_from_uri(format!("file://{}", &full_path.as_str()))
 }

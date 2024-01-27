@@ -35,6 +35,7 @@ neofiglet = "0.1.*"
 os_pipe = "1.1.5"
 parse_datetime = "0.5.*"
 proctitle = "0.1.1"
+prometheus-parse = "0.2.5"
 rand = "0.8.5"
 reqwest = { version="0.11.*", features= ["blocking", "json"] }
 rhai-dylib = "0.1.12"

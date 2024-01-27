@@ -17,6 +17,7 @@ pub mod zbus_export;
 pub mod zbus_export_zabbix;
 pub mod zbus_export_sla_zabbix;
 pub mod zbus_export_events_zabbix;
+pub mod zbus_export_prometheus;
 pub mod zbus_version;
 pub mod zbus_query;
 pub mod zbus_script;
@@ -25,6 +26,7 @@ pub mod zbus_query_metadata;
 pub mod platform_api;
 pub mod zabbix_api;
 pub mod zabbix_lib;
+pub mod prometheus_lib;
 pub mod zenoh_lib;
 
 
@@ -185,6 +187,7 @@ enum ExportCommands {
     History(History),
     Sla(Sla),
     Events(Events),
+    Prometheus(Prometheus),
 }
 
 #[derive(Args, Clone, Debug)]
@@ -362,6 +365,22 @@ pub struct Events {
 
     #[clap(help="Export files extension", long, default_value_t = String::from("*"))]
     pub extension: String,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Export Events data to ZBUS")]
+pub struct Prometheus {
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Process export files in loop")]
+    pub in_loop: bool,
+
+    #[clap(long, default_value_t = 1, help="Interval between runs")]
+    pub every: u16,
+
+    #[clap(help="Prometheus Exporter URL", long, default_value_t = String::from("http://127.0.0.1:9100/metrics"))]
+    pub exporter: String,
+
+    #[clap(help="Telemetry source", long, default_value_t = String::from("prometheus"))]
+    pub source: String,
 }
 
 #[derive(Args, Clone, Debug)]
