@@ -52,6 +52,7 @@ ssh = "0.1.4"
 statrs = "0.16.0"
 sudo = "0.6.0"
 ta = "0.5.0"
+tiny_http = "0.12.0"
 tokio = { version="1.34.*", features = ["full", "time"] }
 unit-conversions = "0.1.13"
 voca_rs = "1.15.2"

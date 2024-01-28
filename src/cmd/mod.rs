@@ -18,6 +18,7 @@ pub mod zbus_export_zabbix;
 pub mod zbus_export_sla_zabbix;
 pub mod zbus_export_events_zabbix;
 pub mod zbus_export_prometheus;
+pub mod zbus_export_stream;
 pub mod zbus_version;
 pub mod zbus_query;
 pub mod zbus_script;
@@ -185,6 +186,7 @@ enum QueryCommands {
 #[derive(Subcommand, Clone, Debug)]
 enum ExportCommands {
     History(History),
+    Stream(Stream),
     Sla(Sla),
     Events(Events),
     Prometheus(Prometheus),
@@ -381,6 +383,32 @@ pub struct Prometheus {
 
     #[clap(help="Telemetry source", long, default_value_t = String::from("prometheus"))]
     pub source: String,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Export telemetry data from Zabbix external streaming")]
+pub struct Stream {
+
+    #[clap(help="Listen address for the stream catcher", long, default_value_t = String::from("0.0.0.0:10055"))]
+    pub listen: String,
+
+    #[clap(help="Telemetry source", long, default_value_t = String::from("Zabbix"))]
+    pub source: String,
+
+    #[clap(long, default_value_t = 1, help="Number of catcher threads")]
+    pub threads: u16,
+
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Print data to STDIN")]
+    pub stdin: bool,
+
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Send telemetry to the bus")]
+    pub bus: bool,
+
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Zabbix history catcher")]
+    pub history: bool,
+
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Zabbix events catcher")]
+    pub events: bool,
 }
 
 #[derive(Args, Clone, Debug)]

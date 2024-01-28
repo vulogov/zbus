@@ -29,5 +29,8 @@ pub fn run(c: &cmd::Cli, exp: &cmd::Export, zc: Config)  {
         cmd::ExportCommands::Prometheus(prometheus) => {
             cmd::zbus_export_prometheus::run(c, prometheus, zc.clone());
         }
+        cmd::ExportCommands::Stream(stream) => {
+            cmd::zbus_export_stream::run(c, stream, zc.clone());
+        }
     }
 }
