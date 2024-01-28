@@ -8,7 +8,18 @@ use zenoh::prelude::sync::*;
 use tiny_http::{Method};
 
 fn run_events(content: String, c: cmd::Cli, stream_cmd: cmd::Stream, zc: Config) {
+    let stream = Deserializer::from_str(&content).into_iter::<Value>();
 
+    for value in stream {
+        match value {
+            Ok(jvalue) => {
+                if stream_cmd.stdout {
+                    println!("{}", serde_json::to_string_pretty(&jvalue).unwrap());
+                }
+            }
+            Err(err) => log::error!("zabbix streamer catch an error during JSON processing: {:?}", err),
+        }
+    }
 }
 
 fn run_history(content: String, c: cmd::Cli, stream_cmd: cmd::Stream, zc: Config) {
@@ -17,7 +28,9 @@ fn run_history(content: String, c: cmd::Cli, stream_cmd: cmd::Stream, zc: Config
     for value in stream {
         match value {
             Ok(jvalue) => {
-                println!("{:?}", &jvalue);
+                if stream_cmd.stdout {
+                    println!("{}", serde_json::to_string_pretty(&jvalue).unwrap());
+                }
             }
             Err(err) => log::error!("zabbix streamer catch an error during JSON processing: {:?}", err),
         }

@@ -399,7 +399,7 @@ pub struct Stream {
     pub threads: u16,
 
     #[clap(long, action = clap::ArgAction::SetTrue, help="Print data to STDIN")]
-    pub stdin: bool,
+    pub stdout: bool,
 
     #[clap(long, action = clap::ArgAction::SetTrue, help="Send telemetry to the bus")]
     pub bus: bool,
