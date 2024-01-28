@@ -7,7 +7,7 @@ use easy_reader::EasyReader;
 use std::fs::File;
 use unit_conversions;
 
-fn convert_zabbix_export_payload_to_zbus(key: String, platform: String, payload: serde_json::Value) -> Option<serde_json::Value> {
+pub fn convert_zabbix_export_payload_to_zbus(key: String, platform: String, payload: serde_json::Value) -> Option<serde_json::Value> {
     match cmd::zabbix_lib::zabbix_key_to_zenoh(key.clone()) {
         Some(zkey) => {
             let timestamp = unit_conversions::time::seconds::to_nanoseconds(payload["clock"].as_f64().unwrap()) + payload["ns"].as_f64().unwrap();
