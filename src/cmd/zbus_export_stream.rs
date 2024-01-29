@@ -50,7 +50,7 @@ fn run_history(content: String, c: cmd::Cli, stream_cmd: cmd::Stream, zc: Config
                                                 _ => format!("zbus/metric/{}/{}/{}{}", &c.protocol_version, &c.platform_name, &payload["src"].as_str().unwrap(), &payload["key"].as_str().unwrap()),
                                             };
                                             match session.put(store_key.clone(), payload.clone()).encoding(KnownEncoding::AppJson).res() {
-                                                Ok(_) => log::info!("ZBX catcher ->ZBUS: {}", &store_key),
+                                                Ok(_) => log::info!("ZBX catcher->ZBUS: {}", &store_key),
                                                 Err(err) => log::error!("Error ingesting {} {:?}: {:?}", &payload["key"], &payload, err),
                                             }
                                         }
@@ -63,6 +63,10 @@ fn run_history(content: String, c: cmd::Cli, stream_cmd: cmd::Stream, zc: Config
                     }
                     Err(err) => log::error!("zabbix streamer catch an error during JSON processing: {:?}", err),
                 }
+            }
+            match session.close().res() {
+                Ok(_) => {},
+                Err(err) => log::error!("Error closing Zenoh session: {:?}", err),
             }
         }
         Err(err) => {

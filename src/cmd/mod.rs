@@ -21,6 +21,7 @@ pub mod zbus_export_prometheus;
 pub mod zbus_export_stream;
 pub mod zbus_version;
 pub mod zbus_query;
+pub mod zbus_pipeline;
 pub mod zbus_script;
 pub mod zbus_query_raw;
 pub mod zbus_query_metadata;
@@ -108,6 +109,10 @@ pub fn init() {
             log::debug!("Run script");
             zbus_script::run(&cli, &script, config.clone());
         }
+        Commands::Pipeline(pipeline) => {
+            log::debug!("Run programmatic telemetry pipeline");
+            zbus_pipeline::run(&cli, &pipeline, config.clone());
+        }
         Commands::Version(_) => {
             log::debug!("Get the tool version");
             zbus_version::run(&cli);
@@ -155,6 +160,7 @@ enum Commands {
     Api(Api),
     Query(Query),
     Script(Script),
+    Pipeline(Pipeline),
     Version(Version),
 }
 
@@ -247,6 +253,27 @@ pub struct Subscribe {
 
     #[clap(last = true)]
     args: Vec<String>,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Run programmatic telemetry pipeline")]
+pub struct Pipeline {
+    #[clap(flatten)]
+    group: PipelineArgGroup,
+
+    #[clap(last = true)]
+    args: Vec<String>,
+}
+
+#[derive(Debug, Clone, clap::Args)]
+#[group(required = true, multiple = false)]
+pub struct PipelineArgGroup {
+
+    #[clap(short, long, help="URL pointing to the file with pipeline code")]
+    url: Option<String>,
+
+    #[clap(short, long, help="Filename of the file with pipeline code")]
+    file: Option<String>,
 }
 
 #[derive(Args, Clone, Debug)]
