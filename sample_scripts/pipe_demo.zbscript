@@ -1,0 +1,9 @@
+if ! bus::pipe::push("in", #{answer: 42}) {
+  print("Failed to bus::push()");
+}
+
+if bus::pipe::is_empty("in") {
+  print("bus is surprisingly empty");
+}
+
+print(bus::pipe::pull("in"));

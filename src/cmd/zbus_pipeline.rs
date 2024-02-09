@@ -1,10 +1,9 @@
 extern crate log;
 use zenoh::config::{Config};
-use zenoh::prelude::sync::*;
 
 use crate::cmd;
 
-pub fn run(c: &cmd::Cli, p: &cmd::Pipeline, zc: Config)  {
+pub fn run(_c: &cmd::Cli, _p: &cmd::Pipeline, _zc: Config)  {
     log::trace!("zbus_pipeline::run() reached");
 
 }

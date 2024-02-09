@@ -27,6 +27,7 @@ fn run_history(content: String, c: cmd::Cli, stream_cmd: cmd::Stream, zc: Config
 
     match zenoh::open(zc).res() {
         Ok(session) => {
+            log::info!("Initiate delivery to bus");
             for value in stream {
                 match value {
                     Ok(zjson) => {
@@ -43,7 +44,7 @@ fn run_history(content: String, c: cmd::Cli, stream_cmd: cmd::Stream, zc: Config
                         if stream_cmd.bus {
                             match cmd::zenoh_lib::get_key_from_metadata(c.platform_name.clone(), "*".to_string(), zjson["itemid"].to_string(), &session) {
                                 Some(key) => {
-                                    match cmd::zbus_export_zabbix::convert_zabbix_export_payload_to_zbus(key, c.platform_name.clone(), zjson.clone()) {
+                                    match cmd::zbus_export_zabbix::convert_zabbix_export_payload_to_zbus(key.clone(), c.platform_name.clone(), zjson.clone()) {
                                         Some(payload) => {
                                             let store_key = match zjson["type"].as_i64() {
                                                 Some(2) => format!("log/metric/{}/{}/{}{}", &c.protocol_version, &c.platform_name, &payload["src"].as_str().unwrap(), &payload["key"].as_str().unwrap()),
@@ -54,10 +55,16 @@ fn run_history(content: String, c: cmd::Cli, stream_cmd: cmd::Stream, zc: Config
                                                 Err(err) => log::error!("Error ingesting {} {:?}: {:?}", &payload["key"], &payload, err),
                                             }
                                         }
-                                        None => continue,
+                                        None => {
+                                            log::error!("Error converting payload for key {}", &key);
+                                            continue;
+                                        }
                                     }
                                 }
-                                None => continue,
+                                None => {
+                                    log::error!("Error converting key {}", &zjson["itemid"]);
+                                    continue;
+                                }
                             }
                         }
                     }
@@ -65,7 +72,7 @@ fn run_history(content: String, c: cmd::Cli, stream_cmd: cmd::Stream, zc: Config
                 }
             }
             match session.close().res() {
-                Ok(_) => {},
+                Ok(_) => { log::info!("Closing connection to bus"); },
                 Err(err) => log::error!("Error closing Zenoh session: {:?}", err),
             }
         }
@@ -87,6 +94,7 @@ pub fn run(c: &cmd::Cli, stream_cmd: &cmd::Stream, zc: Config)  {
                 let stream_cmd = stream_cmd.clone();
                 let c = c.clone();
                 let zc = zc.clone();
+                let i = i.clone();
                 let guard = thread::spawn(move || {
                     loop {
                         match server.recv() {
@@ -97,6 +105,7 @@ pub fn run(c: &cmd::Cli, stream_cmd: &cmd::Stream, zc: Config)  {
                                         Ok(_) => {
                                             match request.method() {
                                                 Method::Post => {
+                                                    log::info!("Request is served by thread #{}", &i);
                                                     if stream_cmd.history {
                                                         run_history(content, c.clone(), stream_cmd.clone(), zc.clone());
                                                     } else if stream_cmd.events {

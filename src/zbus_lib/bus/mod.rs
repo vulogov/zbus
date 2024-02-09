@@ -7,6 +7,9 @@ use zenoh::prelude::sync::*;
 
 use crate::zbus_lib::sampler;
 
+pub mod bus_subscribe;
+pub mod channel;
+
 #[derive(Debug, Clone)]
 pub struct Bus {
     state:      bool,
@@ -314,9 +317,20 @@ pub fn init(engine: &mut Engine) {
           .register_fn("get", Bus::get)
           .register_fn("feed", Bus::feed)
           .register_fn("send", Bus::send)
+          .register_fn("subscribe", Bus::subscribe)
           .register_fn("collect", Bus::collect)
           .register_fn("collect_n_values", Bus::collect_n_values)
           .register_fn("to_string", |x: &mut Bus| format!("{:?}", x) );
-    let module = exported_module!(bus_module);
+    channel::pipes_init();
+    let mut module = exported_module!(bus_module);
+    let mut internal_pipe_module = Module::new();
+    module.set_id("bus");
+    internal_pipe_module.set_id("pipe");
+    // Configuring pipe module
+    internal_pipe_module.set_native_fn("push", channel::pipe_push);
+    internal_pipe_module.set_native_fn("push", channel::pipe_push_map);
+    internal_pipe_module.set_native_fn("pull", channel::pipe_pull);
+    internal_pipe_module.set_native_fn("is_empty", channel::pipe_is_empty);
+    module.set_sub_module("pipe", internal_pipe_module);
     engine.register_static_module("bus", module.into());
 }
