@@ -286,6 +286,12 @@ impl Sampler {
     fn distribute_from_current_timestamp(self: &mut Sampler, d: i64) -> Sampler {
         self.distribute_timestamps(timestamp_ns(), d)
     }
+    pub fn min(self: &mut Sampler) -> f64 {
+        self.data_raw().iter().copied().fold(f64::NAN, f64::min)
+    }
+    pub fn max(self: &mut Sampler) -> f64 {
+        self.data_raw().iter().copied().fold(f64::NAN, f64::max)
+    }
 }
 
 #[export_module]
@@ -306,6 +312,8 @@ pub fn init(engine: &mut Engine) {
           .register_fn("data", Sampler::data)
           .register_fn("xy", Sampler::get_xy)
           .register_fn("values", Sampler::values)
+          .register_fn("min", Sampler::min)
+          .register_fn("max", Sampler::max)
           .register_fn("tsf_next", Sampler::tsf_next)
           .register_fn("oscillator", Sampler::oscillator)
           .register_fn("downsample", Sampler::downsample)
