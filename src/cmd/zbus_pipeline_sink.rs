@@ -1,0 +1,9 @@
+extern crate log;
+use zenoh::config::{Config};
+
+use crate::cmd;
+
+pub fn run(_c: &cmd::Cli, _pipeline: &cmd::Pipeline, _sink: &cmd::PipelineSink, _zc: Config)  {
+    log::trace!("zbus_pipeline_sink::run() reached");
+
+}

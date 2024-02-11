@@ -22,6 +22,11 @@ pub mod zbus_export_stream;
 pub mod zbus_version;
 pub mod zbus_query;
 pub mod zbus_pipeline;
+pub mod zbus_pipeline_generator;
+pub mod zbus_pipeline_processor;
+pub mod zbus_pipeline_sink;
+pub mod zbus_pipeline_aggregator;
+pub mod zbus_pipeline_fan;
 pub mod zbus_script;
 pub mod zbus_query_raw;
 pub mod zbus_query_metadata;
@@ -198,6 +203,15 @@ enum ExportCommands {
     Prometheus(Prometheus),
 }
 
+#[derive(Subcommand, Clone, Debug)]
+enum PipelineCommands {
+    Generator(PipelineGenerator),
+    Processor(PipelineProcessor),
+    Sink(PipelineSink),
+    Fan(PipelineFan),
+    Aggregator(PipelineAggregator),
+}
+
 #[derive(Args, Clone, Debug)]
 #[clap(about="Put single telemetry value to the bus")]
 pub struct Put {
@@ -261,6 +275,9 @@ pub struct Pipeline {
     #[clap(flatten)]
     group: PipelineArgGroup,
 
+    #[clap(subcommand)]
+    command: PipelineCommands,
+
     #[clap(last = true)]
     args: Vec<String>,
 }
@@ -274,6 +291,36 @@ pub struct PipelineArgGroup {
 
     #[clap(short, long, help="Filename of the file with pipeline code")]
     file: Option<String>,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Generate data to pipeline")]
+pub struct PipelineGenerator {
+
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Process data on pipeline")]
+pub struct PipelineProcessor {
+
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Pipeline sink")]
+pub struct PipelineSink {
+
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Pipeline fan")]
+pub struct PipelineFan {
+
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Pipeline aggregator")]
+pub struct PipelineAggregator {
+
 }
 
 #[derive(Args, Clone, Debug)]
