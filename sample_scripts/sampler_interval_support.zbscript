@@ -1,0 +1,30 @@
+let sample1 = Sampler();
+let sample2 = Sampler();
+
+for i in 1..128 {
+  sample1.set(rand_float(1.0, 100.0));
+}
+
+for i in 1..128 {
+  sample2.set(rand_float(10.0, 50.0));
+}
+
+let i = Interval(sample1);
+let j = Interval(sample2);
+
+print("Sampled data set #1 "+sample1.data());
+print("Sampled data set #2 "+sample2.data());
+print("Created interval from set  #1: "+i);
+print("Absolute value of interval #1: "+i.abs());
+print("Ceil value of interval #1: "+i.ceil());
+print("Floor value of interval #1: "+i.floor());
+print("Magnitude of interval #1: "+i.magnitude());
+
+print("Created interval from set  #2: "+j);
+print("Absolute value of interval #2: "+j.abs());
+print("Ceil value of interval #2: "+j.ceil());
+print("Floor value of interval #2: "+j.floor());
+print("Magnitude of interval #2: "+j.magnitude());
+
+print("i max j: "+i.max(j));
+print("i min j: "+i.min(j));

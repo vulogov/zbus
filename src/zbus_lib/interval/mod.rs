@@ -40,6 +40,9 @@ impl Interval {
     fn lower(self: &mut Interval) -> f64 {
         self.i.inf()
     }
+    fn magnitude(self: &mut Interval) -> f64 {
+        self.i.mag()
+    }
     fn contains_in(self: &mut Interval, n: f64) -> bool {
         self.i.contains(n)
     }
@@ -73,6 +76,21 @@ impl Interval {
     fn interval_div(self: &mut Interval, other: Interval) -> Interval {
         Interval::from_interval(self.i.div(other.i))
     }
+    fn interval_abs(self: &mut Interval) -> Interval {
+        Interval::from_interval(self.i.abs())
+    }
+    fn interval_ceil(self: &mut Interval) -> Interval {
+        Interval::from_interval(self.i.ceil())
+    }
+    fn interval_floor(self: &mut Interval) -> Interval {
+        Interval::from_interval(self.i.floor())
+    }
+    fn interval_min(self: &mut Interval, other: Interval) -> Interval {
+        Interval::from_interval(self.i.min(other.i))
+    }
+    fn interval_max(self: &mut Interval, other: Interval) -> Interval {
+        Interval::from_interval(self.i.max(other.i))
+    }
 }
 
 
@@ -91,6 +109,7 @@ pub fn init(engine: &mut Engine) {
           .register_fn("midpoint", Interval::midpoint)
           .register_fn("contains", Interval::contains_in)
           .register_fn("lower", Interval::lower)
+          .register_fn("magnitude", Interval::magnitude)
           .register_fn("less", Interval::less)
           .register_fn("more", Interval::more)
           .register_fn("eq", Interval::eq)
@@ -101,6 +120,11 @@ pub fn init(engine: &mut Engine) {
           .register_fn("sub", Interval::interval_sub)
           .register_fn("mul", Interval::interval_mul)
           .register_fn("div", Interval::interval_div)
+          .register_fn("abs", Interval::interval_abs)
+          .register_fn("ceil", Interval::interval_ceil)
+          .register_fn("floor", Interval::interval_floor)
+          .register_fn("min", Interval::interval_min)
+          .register_fn("max", Interval::interval_max)
           .register_fn("to_string", |x: &mut Interval| format!("Interval({}:{})", x.lower(), x.upper()) );
 
     let module = exported_module!(interval_module);
