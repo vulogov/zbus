@@ -1,0 +1,24 @@
+let code = `
+loop {
+  bus::pipe::push("in", #{"answer": rand_float(0.0, 100.0)});
+  system::sleep(1);
+}
+`;
+
+print("Now we do have "+threads::active()+" active threads");
+print("Now we do have "+threads::busy()+" active threads");
+print("Now we do have "+threads::waiting()+" waiting threads");
+threads::execute(code, "test code");
+let c = 0;
+system::sleep(1);
+while ! bus::pipe::is_empty("in") {
+    print("Received from the thread through 'in' pipe "+bus::pipe::pull("in")+" #"+c);
+    system::sleep(1);
+    c += 1;
+    if c > 10 {
+        break;
+    }
+}
+print("Now we do have "+threads::active()+" active threads");
+print("Now we do have "+threads::busy()+" active threads");
+print("Now we do have "+threads::waiting()+" waiting threads");
