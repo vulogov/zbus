@@ -13,6 +13,7 @@ pub mod conversions;
 pub mod json;
 pub mod zbus_log;
 pub mod timestamp;
+pub mod threads;
 pub mod neuralnet;
 pub mod interval;
 pub mod grok;
@@ -42,7 +43,39 @@ pub fn run_zbus_script(script: String, c: &cmd::Cli, s: &cmd::Script) {
          .push("ZBUS_ADDRESS", Dynamic::from(c.bus.clone()))
          .push("API_ENDPOINT", Dynamic::from(s.endpoint.clone()));
     initscope(&mut scope);
-    initlib(&mut engine);
+    initlib(&mut engine, c);
+    match engine.run_with_scope(&mut scope, script.as_str()) {
+        Ok(res) => {
+            log::debug!("Script returned: {:?}", res);
+        }
+        Err(err) => {
+            log::error!("Script returned error: {:?}", err);
+        }
+    }
+    //threads::terminale_all();
+    //log::debug!("Threads has been terminated, killing ZB-script engine");
+    drop(scope);
+    drop(engine);
+    log::debug!("ZB-script engine is no more");
+}
+
+pub fn run_zbus_script_no_cli(script: String, label: String) {
+    log::trace!("Execiting ZBUS script len()={}, label={}", &script.len(), &label);
+    let mut engine = Engine::new();
+    engine.register_global_module(SciPackage::new().as_shared_module());
+    engine.register_global_module(RandomPackage::new().as_shared_module());
+    engine.register_global_module(FilesystemPackage::new().as_shared_module());
+    engine.register_global_module(UrlPackage::new().as_shared_module());
+    engine.register_global_module(MLPackage::new().as_shared_module());
+    let mut scope = Scope::new();
+    let argv: Vec<Dynamic> = Vec::new();
+    scope.push("ARGV", Dynamic::from(argv))
+         .push("ZBUS_PROTOCOL_VERSION", Dynamic::from("v1"))
+         .push("PLATFORM_NAME", Dynamic::from(""))
+         .push("ZBUS_ADDRESS", Dynamic::from(""))
+         .push("API_ENDPOINT", Dynamic::from(""));
+    initscope(&mut scope);
+    initlib_no_cli(&mut engine);
     match engine.run_with_scope(&mut scope, script.as_str()) {
         Ok(res) => {
             log::debug!("Script returned: {:?}", res);
@@ -53,6 +86,7 @@ pub fn run_zbus_script(script: String, c: &cmd::Cli, s: &cmd::Script) {
     }
     drop(scope);
     drop(engine);
+    log::debug!("ZB-script engine is no more, label={}", &label);
 }
 
 pub fn initscope(scope: &mut Scope) {
@@ -60,7 +94,7 @@ pub fn initscope(scope: &mut Scope) {
     scope.push("ANSWER", 42_i64);
 }
 
-pub fn initlib(engine: &mut Engine)  {
+pub fn initlib(engine: &mut Engine, c: &cmd::Cli)  {
     log::debug!("Initializing ZBUS RHAI library");
     bus::init(engine);
     conversions::init(engine);
@@ -68,6 +102,26 @@ pub fn initlib(engine: &mut Engine)  {
     grok::init(engine);
     zbus_log::init(engine);
     timestamp::init(engine);
+    threads::init(engine, c);
+    interval::init(engine);
+    sampler::init(engine);
+    system::init(engine);
+    input::init(engine);
+    neuralnet::init(engine);
+    filters::init(engine);
+    string::init(engine);
+    zabbix::init(engine);
+}
+
+pub fn initlib_no_cli(engine: &mut Engine)  {
+    log::debug!("Initializing ZBUS RHAI library for thread management");
+    bus::init(engine);
+    conversions::init(engine);
+    json::init(engine);
+    grok::init(engine);
+    zbus_log::init(engine);
+    timestamp::init(engine);
+    threads::init_no_cli(engine);
     interval::init(engine);
     sampler::init(engine);
     system::init(engine);

@@ -1,0 +1,18 @@
+let code = `
+loop {
+  log::info("Hello from thread");
+  system::sleep(2);
+}
+`;
+
+print("Now we do have "+threads::active()+" active threads");
+print("Now we do have "+threads::busy()+" active threads");
+print("Now we do have "+threads::waiting()+" waiting threads");
+threads::execute(code, "test code");
+for i in 0..10 {
+  log::info("Hello from main thread "+i);
+  system::sleep(1);
+}
+print("Now we do have "+threads::active()+" active threads");
+print("Now we do have "+threads::busy()+" active threads");
+print("Now we do have "+threads::waiting()+" waiting threads");

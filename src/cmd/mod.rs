@@ -152,6 +152,9 @@ pub struct Cli {
     #[clap(long, action = clap::ArgAction::SetTrue, help="Configure CONNECT mode for ZENOH bus")]
     pub set_connect_mode: bool,
 
+    #[clap(short, long, default_value_t = 32, help="Number of threads allocated to a thread manager")]
+    pub n: usize,
+
     #[clap(subcommand)]
     command: Commands,
 }
