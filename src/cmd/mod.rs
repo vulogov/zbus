@@ -1,5 +1,6 @@
 extern crate log;
-extern crate hostname;
+
+use crate::stdlib::hostname;
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use std::str::FromStr;
@@ -221,7 +222,7 @@ pub struct Put {
     #[clap(help="Timestamp", long, default_value_t = String::from("now"))]
     pub timestamp: String,
 
-    #[clap(help="Telemetry source", long, default_value_t = String::from(hostname::get().unwrap().into_string().unwrap()))]
+    #[clap(help="Telemetry source", long, default_value_t = String::from(hostname::get_hostname()))]
     pub source: String,
 
     #[clap(long, value_enum, default_value_t = TelemetryType::Metric, help="Telemetry type")]
@@ -243,7 +244,7 @@ pub struct Put {
 #[derive(Args, Clone, Debug)]
 #[clap(about="Get single telemetry value from the bus")]
 pub struct Get {
-    #[clap(help="Telemetry source", long, default_value_t = String::from(hostname::get().unwrap().into_string().unwrap()))]
+    #[clap(help="Telemetry source", long, default_value_t = String::from(hostname::get_hostname()))]
     pub source: String,
 
     #[clap(long, value_enum, default_value_t = TelemetryType::Metric, help="Telemetry type")]
@@ -262,7 +263,7 @@ pub struct Subscribe {
     #[clap(long, value_enum, default_value_t = TelemetryType::Metric, help="Telemetry type")]
     pub telemetry_type: TelemetryType,
 
-    #[clap(help="Telemetry source", long, default_value_t = String::from(hostname::get().unwrap().into_string().unwrap()))]
+    #[clap(help="Telemetry source", long, default_value_t = String::from(hostname::get_hostname()))]
     pub source: String,
 
     #[clap(help="Telemetry key", long, default_value_t = String::from_utf8(vec![]).unwrap())]

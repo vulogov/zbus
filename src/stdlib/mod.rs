@@ -6,6 +6,7 @@ pub mod payload;
 pub mod getfile;
 pub mod fixedqueue;
 pub mod traits;
+pub mod hostname;
 
 use crate::cmd::{Cli};
 

@@ -1,0 +1,15 @@
+let m = Metric("zbus/metric/v1/local/home.lan/pi")
+        .value(3.14)
+        .tag("DOMAIN", "MATH");
+
+let data = EmptySampler();
+
+print("Metric         : "+m);
+print("Metric as JSON : "+m.json());
+print("Pushing Metric() to Sampler(), and number of data elements initialized in Sampler() is "+data.set(m));
+print("Number of data elements pushed to Sampler() is "+data.len());
+if data.data()[0] == 3.14 {
+  print("Correct Metric() value has been pushed to Sampler() and it is "+data.data()[0]);
+} else {
+  print("Something is wrong")
+}

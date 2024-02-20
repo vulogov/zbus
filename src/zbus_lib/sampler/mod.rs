@@ -10,6 +10,7 @@ use lexical_core;
 use std::collections::VecDeque;
 
 mod eq;
+mod metric;
 mod zip;
 mod construct;
 mod smooth;
@@ -47,9 +48,20 @@ impl Sampler {
         res.zero();
         res
     }
+    pub fn init_no_ts() -> Sampler {
+        let mut res = Sampler::new();
+        res.zero_no_ts();
+        res
+    }
     fn zero(self: &mut Sampler) {
         for _ in 1..129 {
             self.try_set(0.0 as f64);
+            self.try_set_ts(0.0);
+        }
+    }
+    fn zero_no_ts(self: &mut Sampler) {
+        for _ in 1..129 {
+            self.try_set_no_ts(0.0 as f64);
             self.try_set_ts(0.0);
         }
     }
@@ -66,6 +78,10 @@ impl Sampler {
     }
 
     pub fn try_set(self: &mut Sampler, v: f64) {
+        self.try_set_no_ts(v);
+        self.try_set_current_ts();
+    }
+    pub fn try_set_no_ts(self: &mut Sampler, v: f64) {
         if self.d.len() == self.d.capacity() {
             let _ = self.d.pop_front();
         }
@@ -82,24 +98,20 @@ impl Sampler {
             None => self.fosc_next = v.clone(),
         }
         let _ = self.d.push_back(v);
-        self.try_set_current_ts();
     }
     pub fn set(self: &mut Sampler, v: Dynamic) -> Result<Dynamic, Box<EvalAltResult>> {
         if v.is_float() {
             self.try_set(v.clone_cast::<f64>());
-            self.try_set_current_ts();
             return Result::Ok(Dynamic::from(self.d.len() as i64));
         }
         if v.is_int() {
             self.try_set(v.clone_cast::<i64>() as f64);
-            self.try_set_current_ts();
             return Result::Ok(Dynamic::from(self.d.len() as i64));
         }
         if v.is_string() {
             match lexical_core::parse::<f64>(v.clone_cast::<String>().as_bytes()) {
                 Ok(res) => {
                     self.try_set(res);
-                    self.try_set_current_ts();
                 }
                 _ => {
                     return Err("Error parsing string value for Sampler".into());
@@ -109,30 +121,36 @@ impl Sampler {
         }
         Err("Value for the Sampler must be numeric".into())
     }
-    pub fn set_and_ts(self: &mut Sampler, v: Dynamic, ts: f64) -> Result<Dynamic, Box<EvalAltResult>> {
+    pub fn set_and_ts_raw(self: &mut Sampler, v: Dynamic, ts: f64) -> Result<i64, Box<EvalAltResult>> {
         if v.is_float() {
-            self.try_set(v.clone_cast::<f64>());
+            self.try_set_no_ts(v.clone_cast::<f64>());
             self.try_set_ts(ts);
-            return Result::Ok(Dynamic::from(self.d.len() as i64));
+            return Result::Ok(self.d.len() as i64);
         }
         if v.is_int() {
-            self.try_set(v.clone_cast::<i64>() as f64);
+            self.try_set_no_ts(v.clone_cast::<i64>() as f64);
             self.try_set_ts(ts);
-            return Result::Ok(Dynamic::from(self.d.len() as i64));
+            return Result::Ok(self.d.len() as i64);
         }
         if v.is_string() {
             match lexical_core::parse::<f64>(v.clone_cast::<String>().as_bytes()) {
                 Ok(res) => {
-                    self.try_set(res);
+                    self.try_set_no_ts(res);
                     self.try_set_ts(ts);
                 }
                 _ => {
                     return Err("Error parsing string value for Sampler".into());
                 }
             }
-            return Result::Ok(Dynamic::from(self.d.len() as i64));
+            return Result::Ok(self.d.len() as i64);
         }
         Err("Value for the Sampler must be numeric".into())
+    }
+    pub fn set_and_ts(self: &mut Sampler, v: Dynamic, ts: f64) -> Result<Dynamic, Box<EvalAltResult>> {
+        match self.set_and_ts_raw(v, ts) {
+            Ok(res) => return Result::Ok(Dynamic::from(res)),
+            Err(err) => return Err(format!("{:?}", err).into()),
+        }
     }
     fn tsf_next(self: &mut Sampler) -> Dynamic {
         Dynamic::from(self.tsf_next)
@@ -292,6 +310,15 @@ impl Sampler {
     pub fn max(self: &mut Sampler) -> f64 {
         self.data_raw().iter().copied().fold(f64::NAN, f64::max)
     }
+    pub fn data_len(self: &mut Sampler) -> i64 {
+        let mut res: i64 = 0;
+        for (t,_) in self.values_raw() {
+            if t != 0.0 {
+                res += 1;
+            }
+        }
+        res.clone()
+    }
 }
 
 #[export_module]
@@ -305,8 +332,11 @@ pub fn init(engine: &mut Engine) {
 
     engine.register_type::<Sampler>()
           .register_fn("Sampler", Sampler::init)
+          .register_fn("EmptySampler", Sampler::init_no_ts)
+          .register_fn("len", Sampler::data_len)
           .register_fn("set", Sampler::set)
           .register_fn("set", Sampler::set_and_ts)
+          .register_fn("set", Sampler::set_and_ts_from_metric)
           .register_fn("raw", Sampler::raw)
           .register_fn("get", Sampler::get)
           .register_fn("data", Sampler::data)

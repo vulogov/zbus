@@ -18,6 +18,7 @@ pub mod neuralnet;
 pub mod interval;
 pub mod grok;
 pub mod sampler;
+pub mod metric;
 pub mod input;
 pub mod filters;
 pub mod system;
@@ -96,34 +97,27 @@ pub fn initscope(scope: &mut Scope) {
 
 pub fn initlib(engine: &mut Engine, c: &cmd::Cli)  {
     log::debug!("Initializing ZBUS RHAI library");
-    bus::init(engine);
-    conversions::init(engine);
-    json::init(engine);
-    grok::init(engine);
-    zbus_log::init(engine);
-    timestamp::init(engine);
+    initlib_no_cli_required(engine);
     threads::init(engine, c);
-    interval::init(engine);
-    sampler::init(engine);
-    system::init(engine);
-    input::init(engine);
-    neuralnet::init(engine);
-    filters::init(engine);
-    string::init(engine);
-    zabbix::init(engine);
 }
 
 pub fn initlib_no_cli(engine: &mut Engine)  {
     log::debug!("Initializing ZBUS RHAI library for thread management");
+    initlib_no_cli_required(engine);
+    threads::init_no_cli(engine);
+}
+
+fn initlib_no_cli_required(engine: &mut Engine)  {
+    log::debug!("Initializing ZBUS RHAI library generic modules");
     bus::init(engine);
     conversions::init(engine);
     json::init(engine);
     grok::init(engine);
     zbus_log::init(engine);
     timestamp::init(engine);
-    threads::init_no_cli(engine);
     interval::init(engine);
     sampler::init(engine);
+    metric::init(engine);
     system::init(engine);
     input::init(engine);
     neuralnet::init(engine);
