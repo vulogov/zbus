@@ -180,6 +180,8 @@ pub enum TelemetryType {
     Event,
     Trace,
     Log,
+    Pipeline,
+    Raw,
 }
 
 #[derive(Debug, Copy, Clone, ValueEnum)]

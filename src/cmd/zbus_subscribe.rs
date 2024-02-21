@@ -24,7 +24,9 @@ pub fn run(c: &cmd::Cli, s: &cmd::Subscribe, zc: Config)  {
                 cmd::TelemetryType::Metric => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &s.source, &s.key),
                 cmd::TelemetryType::Event => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &s.source, &s.key),
                 cmd::TelemetryType::Trace => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &s.source, &s.key),
-                cmd::TelemetryType::Log => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &s.source, &s.key)
+                cmd::TelemetryType::Log => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &s.source, &s.key),
+                cmd::TelemetryType::Pipeline => format!("zbus/pipeline/{}/{}", &c.protocol_version, &s.key),
+                cmd::TelemetryType::Raw => format!("{}", &s.key)
             };
             log::debug!("Telemetry key is: {}", &key);
             match session.declare_subscriber(&key)

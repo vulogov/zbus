@@ -29,7 +29,9 @@ pub fn run(c: &cmd::Cli, p: &cmd::Put, zc: Config)  {
                                 cmd::TelemetryType::Metric => format!("zbus/metric/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &p.source, &p.key),
                                 cmd::TelemetryType::Event => format!("zbus/event/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &p.source, &p.key),
                                 cmd::TelemetryType::Trace => format!("zbus/trace/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &p.source, &p.key),
-                                cmd::TelemetryType::Log => format!("zbus/log/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &p.source, &p.key)
+                                cmd::TelemetryType::Log => format!("zbus/log/{}/{}/{}/{}", &c.protocol_version, &c.platform_name, &p.source, &p.key),
+                                cmd::TelemetryType::Pipeline => format!("zbus/pipeline/{}/{}", &c.protocol_version, &p.key),
+                                cmd::TelemetryType::Raw => format!("{}", &p.key)
                             };
                             log::debug!("Telemetry key is: {}", &key);
                             if p.raw_value {
