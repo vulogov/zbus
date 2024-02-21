@@ -29,6 +29,7 @@ pub mod zbus_pipeline_processor;
 pub mod zbus_pipeline_sink;
 pub mod zbus_pipeline_aggregator;
 pub mod zbus_pipeline_fan;
+pub mod zbus_pipeline_lib;
 pub mod zbus_script;
 pub mod zbus_query_raw;
 pub mod zbus_query_metadata;
@@ -316,6 +317,11 @@ pub struct PipelineFeeder {
 #[clap(about="Generate data to pipeline")]
 pub struct PipelineGenerator {
 
+    #[clap(help="Pipeline name", long)]
+    pub pipeline: String,
+
+    #[clap(last = true)]
+    pub args: Vec<String>,
 }
 
 #[derive(Args, Clone, Debug)]
@@ -334,6 +340,11 @@ pub struct PipelineSink {
 #[clap(about="Pipeline fan")]
 pub struct PipelineFan {
 
+    #[clap(help="Pipeline name", long)]
+    pub pipeline: Vec<String>,
+
+    #[clap(last = true)]
+    pub args: Vec<String>,
 }
 
 #[derive(Args, Clone, Debug)]
