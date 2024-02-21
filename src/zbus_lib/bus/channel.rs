@@ -28,7 +28,7 @@ pub fn create_pipe(n: String) {
     drop(q);
 }
 
-pub fn pipe_is_empty(_context: NativeCallContext, k: String) -> Result<bool, Box<EvalAltResult>> {
+pub fn pipe_is_empty_fun(k: String) -> Result<bool, Box<EvalAltResult>> {
     let mut q = PIPES.lock().unwrap();
     if ! q.contains_key(&k) {
         drop(q);
@@ -41,6 +41,25 @@ pub fn pipe_is_empty(_context: NativeCallContext, k: String) -> Result<bool, Box
     }
     drop(q);
     Result::Ok(false)
+}
+
+pub fn pipe_is_empty_raw(k: String) -> bool {
+    let mut q = PIPES.lock().unwrap();
+    if ! q.contains_key(&k) {
+        drop(q);
+        return false;
+    }
+    let (_, r) = q.get_mut(&k).unwrap();
+    if r.is_empty() {
+        drop(q);
+        return true;
+    }
+    drop(q);
+    false
+}
+
+pub fn pipe_is_empty(_context: NativeCallContext, k: String) -> Result<bool, Box<EvalAltResult>> {
+    pipe_is_empty_fun(k)
 }
 
 pub fn pipe_push_raw(k: String, d: String) {
@@ -109,7 +128,7 @@ pub fn try_pipe_push(k: String, d: Dynamic) -> Result<bool, Box<EvalAltResult>> 
     Result::Ok(true)
 }
 
-pub fn pipe_pull(_context: NativeCallContext, k: String) -> Result<Dynamic, Box<EvalAltResult>> {
+pub fn pipe_pull_fun(k: String) -> Result<Dynamic, Box<EvalAltResult>> {
     let mut q = PIPES.lock().unwrap();
     if ! q.contains_key(&k) {
         drop(q);
@@ -135,4 +154,26 @@ pub fn pipe_pull(_context: NativeCallContext, k: String) -> Result<Dynamic, Box<
         }
         Err(err) => Err(format!("bus::internal::pipe {} can not recv: {}", &k, &err).into()),
     }
+}
+
+pub fn pipe_pull_raw(k: String) -> Result<String, Box<EvalAltResult>> {
+    let mut q = PIPES.lock().unwrap();
+    if ! q.contains_key(&k) {
+        drop(q);
+        return Err(format!("bus::internal::pipe no pipe: {}", &k).into());
+    }
+    let (_, r) = q.get_mut(&k).unwrap();
+    if r.is_empty() {
+        return Err(format!("bus::internal::pipe is empty: {}", &k).into());
+    }
+    match r.recv() {
+        Ok(res) => {
+            return Result::Ok(res);
+        }
+        Err(err) => Err(format!("bus::internal::pipe {} can not recv: {}", &k, &err).into()),
+    }
+}
+
+pub fn pipe_pull(_context: NativeCallContext, k: String) -> Result<Dynamic, Box<EvalAltResult>> {
+    pipe_pull_fun(k)
 }

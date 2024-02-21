@@ -5,6 +5,7 @@ use serde_json::json;
 use rhai::serde::{to_dynamic};
 
 use crate::zbus_lib::timestamp;
+use crate::zbus_lib::bus::channel;
 use crate::stdlib::hostname;
 
 #[derive(Debug, Clone)]
@@ -55,6 +56,14 @@ impl Metric {
         self.set_tag(key, value);
         return self.clone()
     }
+    fn out_fun(self: &mut Metric) -> Result<bool, Box<EvalAltResult>> {
+        match self.to_json() {
+            Ok(data) => {
+                channel::try_pipe_push("out".to_string(), data)
+            }
+            Err(err) => return Err(format!("{:?}", err).into()),
+        }
+    }
     fn to_json(self: &mut Metric) -> Result<Dynamic, Box<EvalAltResult>> {
         match to_dynamic(json!({
             "key":          self.key,
@@ -87,6 +96,7 @@ pub fn init(engine: &mut Engine) {
           .register_fn("timestamp", Metric::set_timestamp)
           .register_fn("tag",       Metric::set_tag_fun)
           .register_fn("json",      Metric::to_json)
+          .register_fn("out",       Metric::out_fun)
           .register_indexer_set(Metric::set_tag)
           .register_fn("to_string", |x: &mut Metric| format!("Metric({})", x.key) );
 

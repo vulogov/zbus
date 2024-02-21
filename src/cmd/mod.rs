@@ -24,6 +24,7 @@ pub mod zbus_version;
 pub mod zbus_query;
 pub mod zbus_pipeline;
 pub mod zbus_pipeline_generator;
+pub mod zbus_pipeline_feeder;
 pub mod zbus_pipeline_processor;
 pub mod zbus_pipeline_sink;
 pub mod zbus_pipeline_aggregator;
@@ -209,6 +210,7 @@ enum ExportCommands {
 
 #[derive(Subcommand, Clone, Debug)]
 enum PipelineCommands {
+    Feeder(PipelineFeeder),
     Generator(PipelineGenerator),
     Processor(PipelineProcessor),
     Sink(PipelineSink),
@@ -290,11 +292,22 @@ pub struct Pipeline {
 #[group(required = true, multiple = false)]
 pub struct PipelineArgGroup {
 
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Take pipeline script from STDIN")]
+    pub stdin: bool,
+
     #[clap(short, long, help="URL pointing to the file with pipeline code")]
     url: Option<String>,
 
     #[clap(short, long, help="Filename of the file with pipeline code")]
     file: Option<String>,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Feed data to Zbus pipeline")]
+pub struct PipelineFeeder {
+
+    #[clap(last = true)]
+    pub args: Vec<String>,
 }
 
 #[derive(Args, Clone, Debug)]

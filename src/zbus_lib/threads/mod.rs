@@ -9,7 +9,7 @@ use crate::cmd;
 use crate::zbus_lib;
 
 lazy_static! {
-    static ref THREADS: Mutex<ThreadManager<()>> = {
+    pub static ref THREADS: Mutex<ThreadManager<()>> = {
         let e: Mutex<ThreadManager<()>> = Mutex::new(ThreadManager::<()>::new(4));
         e
     };

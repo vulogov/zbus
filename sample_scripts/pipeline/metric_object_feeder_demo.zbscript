@@ -1,0 +1,11 @@
+let m = Metric("zbus/metric/v1/local/home.lan/pi")
+        .value(3.14)
+        .tag("DOMAIN", "MATH");
+
+print("Metric         : "+m);
+print("Metric as JSON : "+m.json());
+if m.out() {
+  log::info("Metric successfully scheduled for delivery");
+} else {
+  log::error("Something wrong");
+}
