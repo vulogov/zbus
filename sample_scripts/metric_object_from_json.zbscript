@@ -1,0 +1,12 @@
+let m = Metric("zbus/metric/v1/local/home.lan/pi")
+        .value(3.14)
+        .tag("DOMAIN", "MATH");
+
+
+print("Metric         : "+m);
+print("Metric as JSON : "+m.json());
+let jm = m.as_string();
+let m_copy = metric::convert_from_string(jm);
+print("Metric as String: "+jm);
+print("Metric from String: "+m_copy);
+print("Metric from String(JSON): "+m_copy.json());

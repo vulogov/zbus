@@ -13,7 +13,7 @@ pub struct Metric {
     pub key:        String,
     value:          Dynamic,
     pub timestamp:  f64,
-    tags:           Map,
+    pub tags:       Map,
     pub platform:   String,
     pub skey:       String,
     pub src:        String,
@@ -78,9 +78,87 @@ impl Metric {
             Err(err) => Err(format!("Error converting Metric(): {:?}", err).into())
         }
     }
+    fn as_string(self: &mut Metric) -> Result<Dynamic, Box<EvalAltResult>> {
+        match self.to_json() {
+            Ok(jself) => {
+                match serde_json::to_string(&jself) {
+                    Ok(res) => Ok(res.into()),
+                    Err(err) => Err(format!("{:?}", err).into()),
+                }
+            }
+            Err(err) => {
+                return Err(format!("{:?}", err).into());
+            }
+        }
+    }
+}
+
+pub fn metric_from_string_raw(s: String) -> Result<Metric, Box<EvalAltResult>> {
+    match serde_json::from_str::<Map>(&s) {
+        Ok(value) => {
+            return metric_from_json_raw(value);
+        }
+        Err(err) => {
+            return Err(format!("Error converting Metric from JSON: {:?}", err).into());
+        }
+    }
 }
 
 
+pub fn metric_from_json_raw(j: Map) -> Result<Metric, Box<EvalAltResult>> {
+    match j.get("key") {
+        Some(key) => {
+            let mut m: Metric = Metric::new(key.to_string());
+            let mut m = match j.get("value") {
+                Some(value) => m.set_value(value.clone()),
+                None => m
+            };
+            let mut m = match j.get("timestamp") {
+                Some(timestamp) => m.set_timestamp(timestamp.as_float().unwrap()),
+                None => m
+            };
+            match j.get("platform") {
+                Some(platform) => m.platform = platform.to_string().clone(),
+                None => {}
+            };
+            match j.get("skey") {
+                Some(skey) => m.skey = skey.to_string().clone(),
+                None => {}
+            };
+            match j.get("src") {
+                Some(src) => m.src = src.to_string().clone(),
+                None => {}
+            };
+            match j.get("tags") {
+                Some(tags) => m.tags = tags.clone_cast::<Map>(),
+                None => {}
+            };
+            return Ok(m);
+        }
+        None => {
+            return Err(format!("Can not make Metric from JSON argument key is missed").into())
+        }
+    }
+}
+
+pub fn metric_from_json(_context: NativeCallContext, j: Map) -> Result<Metric, Box<EvalAltResult>> {
+    metric_from_json_raw(j)
+}
+
+pub fn metric_from_string(_context: NativeCallContext, s: String) -> Result<Metric, Box<EvalAltResult>> {
+    metric_from_string_raw(s)
+}
+
+pub fn metric_from_in_channel(_context: NativeCallContext) -> Result<Metric, Box<EvalAltResult>> {
+    loop {
+        if ! channel::pipe_is_empty_raw("in".to_string()) {
+            return match channel::pipe_pull_raw("in".to_string()) {
+                Ok(data) => metric_from_string_raw(data),
+                Err(err) => Err(format!("{:?}", err).into()),
+            };
+        }
+    }
+}
 
 #[export_module]
 pub mod metric_module {
@@ -96,10 +174,14 @@ pub fn init(engine: &mut Engine) {
           .register_fn("timestamp", Metric::set_timestamp)
           .register_fn("tag",       Metric::set_tag_fun)
           .register_fn("json",      Metric::to_json)
+          .register_fn("as_string", Metric::as_string)
           .register_fn("out",       Metric::out_fun)
           .register_indexer_set(Metric::set_tag)
           .register_fn("to_string", |x: &mut Metric| format!("Metric({})", x.key) );
 
-    let module = exported_module!(metric_module);
+    let mut module = exported_module!(metric_module);
+    module.set_native_fn("convert_from_json", metric_from_json);
+    module.set_native_fn("convert_from_string", metric_from_string);
+    module.set_native_fn("receive", metric_from_in_channel);
     engine.register_static_module("metric", module.into());
 }

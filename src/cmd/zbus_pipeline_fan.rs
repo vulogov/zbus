@@ -20,7 +20,7 @@ pub fn run(c: &cmd::Cli, pipeline: &cmd::Pipeline, fan: &cmd::PipelineFan, zc: C
         argv.push(Dynamic::from(v));
     }
 
-    cmd::zbus_pipeline_lib::pipeline_bus_channel("in".to_string(), fan.pipeline.clone(), c.clone(), zc);
+    cmd::zbus_pipeline_lib::pipeline_bus_channel("in".to_string(), fan.pipeline_in.clone(), c.clone(), zc.clone());
 
     for n in &fan.pipeline {
         log::debug!("Launching processor for pipeline {}", n);

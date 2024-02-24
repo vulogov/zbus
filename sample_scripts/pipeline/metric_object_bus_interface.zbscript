@@ -1,0 +1,6 @@
+let c = 0;
+
+let m = metric::receive();
+
+print("Received Mertic() "+m);
+print("Received Mertic() as JSON "+m.json());
