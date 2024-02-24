@@ -1,0 +1,11 @@
+let c = 0;
+
+loop {
+  while ! bus::pipe::is_empty("in") {
+      print("Received from the pipeline "+bus::pipe::pull("in"));
+      c += 1;
+  }
+  if c > 0 {
+      break;
+  }
+}

@@ -20,6 +20,8 @@ pub fn run(c: &cmd::Cli, pipeline: &cmd::Pipeline, fan: &cmd::PipelineFan, zc: C
         argv.push(Dynamic::from(v));
     }
 
+    cmd::zbus_pipeline_lib::pipeline_bus_channel("in".to_string(), fan.pipeline.clone(), c.clone(), zc);
+
     for n in &fan.pipeline {
         log::debug!("Launching processor for pipeline {}", n);
         cmd::zbus_pipeline_lib::pipeline_channel_bus("out".to_string(), n.clone(), c.clone(), zc.clone());
@@ -51,6 +53,11 @@ pub fn run(c: &cmd::Cli, pipeline: &cmd::Pipeline, fan: &cmd::PipelineFan, zc: C
                 }
             }
         }
+    }
+    log::debug!("Script is finished, now wait for flushing the IN channel");
+    while ! zbus_lib::bus::channel::pipe_is_empty_raw("in".to_string()) {
+        log::debug!("IN channel is not flushed to ZBUS. Waiting...");
+        zbus_lib::system::system_module::sleep(5);
     }
     log::debug!("Script is finished, now wait for flushing the OUT channel");
     while ! zbus_lib::bus::channel::pipe_is_empty_raw("out".to_string()) {

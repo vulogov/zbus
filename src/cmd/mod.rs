@@ -294,7 +294,6 @@ pub struct Pipeline {
 #[derive(Debug, Clone, clap::Args)]
 #[group(required = true, multiple = false)]
 pub struct PipelineArgGroup {
-
     #[clap(long, action = clap::ArgAction::SetTrue, help="Take pipeline script from STDIN")]
     pub stdin: bool,
 
@@ -308,7 +307,6 @@ pub struct PipelineArgGroup {
 #[derive(Args, Clone, Debug)]
 #[clap(about="Feed data to Zbus pipeline")]
 pub struct PipelineFeeder {
-
     #[clap(last = true)]
     pub args: Vec<String>,
 }
@@ -316,7 +314,6 @@ pub struct PipelineFeeder {
 #[derive(Args, Clone, Debug)]
 #[clap(about="Generate data to pipeline")]
 pub struct PipelineGenerator {
-
     #[clap(help="Pipeline name", long)]
     pub pipeline: String,
 
@@ -327,21 +324,32 @@ pub struct PipelineGenerator {
 #[derive(Args, Clone, Debug)]
 #[clap(about="Process data on pipeline")]
 pub struct PipelineProcessor {
+    #[clap(help="Output pipeline name", long)]
+    pub pipeline: String,
+    #[clap(help="Input pipeline name", long)]
+    pub pipeline_in: String,
 
+    #[clap(last = true)]
+    pub args: Vec<String>,
 }
 
 #[derive(Args, Clone, Debug)]
 #[clap(about="Pipeline sink")]
 pub struct PipelineSink {
+    #[clap(help="Pipeline name", long)]
+    pub pipeline: String,
 
+    #[clap(last = true)]
+    pub args: Vec<String>,
 }
 
 #[derive(Args, Clone, Debug)]
 #[clap(about="Pipeline fan")]
 pub struct PipelineFan {
-
-    #[clap(help="Pipeline name", long)]
+    #[clap(help="Output pipelines names", long)]
     pub pipeline: Vec<String>,
+    #[clap(help="Input pipeline name", long)]
+    pub pipeline_in: String,
 
     #[clap(last = true)]
     pub args: Vec<String>,
@@ -350,7 +358,13 @@ pub struct PipelineFan {
 #[derive(Args, Clone, Debug)]
 #[clap(about="Pipeline aggregator")]
 pub struct PipelineAggregator {
+    #[clap(help="Input pipelines names", long)]
+    pub pipeline_in: Vec<String>,
+    #[clap(help="Output pipeline name", long)]
+    pub pipeline: String,
 
+    #[clap(last = true)]
+    pub args: Vec<String>,
 }
 
 #[derive(Args, Clone, Debug)]
