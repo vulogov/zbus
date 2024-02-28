@@ -530,7 +530,7 @@ pub struct Stream {
 }
 
 #[derive(Args, Clone, Debug)]
-#[clap(about="Platform API calls")]
+#[clap(about="Query telemetry data on ZBUS")]
 pub struct Query {
     #[clap(subcommand)]
     command: QueryCommands,
