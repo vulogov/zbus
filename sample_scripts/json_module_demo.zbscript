@@ -1,0 +1,22 @@
+let array_data = [1,2,3];
+let map_data   = #{"answer": 42};
+
+let s_array_data = json::string(array_data);
+let s_map_data   = json::string(map_data);
+
+print("Array to String    "+s_array_data);
+print("String to Dynamic  "+json::dynamic(s_array_data));
+print("Trying to convert Array to Map");
+try {
+  json::to_map(s_array_data);
+} catch {
+  print("True, Array is not the Map");
+}
+print("Map to String      "+s_map_data);
+print("String to Dynamic  "+json::dynamic(s_map_data));
+print("Trying to convert Map to Array");
+try {
+  json::to_list(s_map_data);
+} catch {
+  print("True, Map is not the Array");
+}

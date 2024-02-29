@@ -8,8 +8,6 @@ use crate::zbus_lib;
 pub fn run(c: &cmd::Cli, pipeline: &cmd::Pipeline, fan: &cmd::PipelineFan, zc: Config)  {
     log::trace!("zbus_pipeline_fan::run() reached");
 
-    println!("{:?}", &fan.pipeline);
-
     if fan.pipeline.len() == 0 {
         log::error!("You did not specified pipeline names for a fan pipeline");
         return;
