@@ -14,7 +14,7 @@ use crate::zbus_lib;
 use crate::cmd;
 use crate::cmd::{zbus_pipeline_feeder, zbus_pipeline_generator, zbus_pipeline_processor, zbus_pipeline_sink, zbus_pipeline_aggregator, zbus_pipeline_fan};
 
-pub fn run_zbus_script_for_pipeline(script: String, c: &cmd::Cli, argv: Vec<Dynamic>) {
+pub fn run_zbus_script_for_pipeline(script: String, tool: String, c: &cmd::Cli, argv: Vec<Dynamic>) {
     log::trace!("Execiting ZBUS scriptfor pipeline len()={}", &script.len());
     let mut engine = Engine::new();
     engine.register_global_module(SciPackage::new().as_shared_module());
@@ -28,7 +28,8 @@ pub fn run_zbus_script_for_pipeline(script: String, c: &cmd::Cli, argv: Vec<Dyna
          .push("ZBUS_PROTOCOL_VERSION", Dynamic::from(c.protocol_version.clone()))
          .push("PLATFORM_NAME", Dynamic::from(c.platform_name.clone()))
          .push("ZBUS_ADDRESS", Dynamic::from(c.bus.clone()))
-         .push("API_ENDPOINT", Dynamic::from("".to_string()));
+         .push("API_ENDPOINT", Dynamic::from("".to_string()))
+         .push("PIPELINE_TOOL", Dynamic::from(tool.clone()));
     zbus_lib::initscope(&mut scope);
     zbus_lib::initlib(&mut engine, c);
     match engine.run_with_scope(&mut scope, script.as_str()) {
