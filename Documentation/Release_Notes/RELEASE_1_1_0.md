@@ -6,3 +6,5 @@ ZBUS project offers command-line tool called zbus. Added features of this tool a
 ZB-script new standard library features:
 
 * Improve error handling in json:: module
+* Function timestamp::timestamp_sec()
+* Type TimeInterval()
