@@ -1,0 +1,4 @@
+let i = TimeInterval();
+print("TimeInterval() is "+i);
+let j = TimeInterval(600, timestamp::timestamp_sec());
+print("Another TimeInterval() is "+j);
