@@ -18,6 +18,7 @@ pub mod neuralnet;
 pub mod interval;
 pub mod grok;
 pub mod sampler;
+pub mod dynamicsampler;
 pub mod metric;
 pub mod input;
 pub mod filters;
@@ -119,6 +120,7 @@ fn initlib_no_cli_required(engine: &mut Engine)  {
     timestamp::init(engine);
     interval::init(engine);
     sampler::init(engine);
+    dynamicsampler::init(engine);
     metric::init(engine);
     system::init(engine);
     input::init(engine);

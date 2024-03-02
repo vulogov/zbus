@@ -10,7 +10,7 @@ pub struct TimeInterval {
 }
 
 impl TimeInterval {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let curr = timestamp_module::timestamp_sec();
         Self {
             s: curr - 150,
@@ -69,6 +69,7 @@ pub fn init(engine: &mut Engine) {
           .register_fn("TimeInterval",    TimeInterval::new_with_delta)
           .register_fn("TimeInterval",    TimeInterval::new_with_delta_and_seconds)
           .register_fn("TimeInterval",    TimeInterval::new_with_delta_and_nanoseconds)
+          .register_fn("elapsed",         TimeInterval::elapsed)
           .register_fn("to_string", |x: &mut TimeInterval| format!("TimeInterval({}-{}, elapsed {})", x.s, x.e, (x.e-x.s)) );
 
     let module = exported_module!(timestamp_module);

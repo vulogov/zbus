@@ -8,3 +8,4 @@ ZB-script new standard library features:
 * Improve error handling in json:: module
 * Function timestamp::timestamp_sec()
 * Type TimeInterval()
+* Method TimeInterval().elapsed()
