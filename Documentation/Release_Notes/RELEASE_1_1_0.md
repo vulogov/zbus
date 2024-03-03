@@ -9,3 +9,5 @@ ZB-script new standard library features:
 * Function timestamp::timestamp_sec()
 * Type TimeInterval()
 * Method TimeInterval().elapsed()
+* interval::observation_error() function
+* DynamicSampler() object type
