@@ -55,8 +55,8 @@ impl Sampler {
     }
     fn zero(self: &mut Sampler) {
         for _ in 1..129 {
-            self.try_set(0.0 as f64);
-            self.try_set_ts(0.0);
+            self.try_set_no_ts(0.0 as f64);
+            self.try_set_current_ts();
         }
     }
     fn zero_no_ts(self: &mut Sampler) {

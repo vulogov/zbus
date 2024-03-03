@@ -3,12 +3,11 @@ use rhai::{Engine, EvalAltResult, Dynamic, Array};
 use rhai::plugin::*;
 use std::collections::VecDeque;
 
-use crate::zbus_lib::{timestamp, metric, string};
+use crate::zbus_lib::{timestamp, metric, string, sampler};
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct DynamicSampler {
-    pub t:          timestamp::TimeInterval,
     pub k:          String,
     pub s:          i64,
     d:              VecDeque<metric::Metric>,
@@ -17,7 +16,6 @@ pub struct DynamicSampler {
 impl DynamicSampler {
     fn new() -> Self {
         Self {
-            t: timestamp::TimeInterval::new(),
             k: "".to_string(),
             s: 128 as i64,
             d: VecDeque::new(),
@@ -54,21 +52,17 @@ impl DynamicSampler {
         self.d.len() as i64
     }
     fn set(self: &mut DynamicSampler, m: metric::Metric) -> bool {
-        let key = format!("{}", m.timestamp);
+        let key = m.key.clone();
         if self.k.len() == 0 {
             self.k = key.clone();
         }
         if self.k != key {
+            log::warn!("DynamicSampler().set() key mismatch {} <> {}", &self.k, &key);
             return false;
         }
         if self.is_timestamp(m.clone()) {
+            log::warn!("DynamicSampler().set() timestamp is not unique");
             return false;
-        }
-        let stamp = timestamp::timestamp_module::whole_seconds(m.timestamp) as i64;
-        if stamp > self.t.e {
-            self.t.e = stamp;
-        } else if stamp < self.t.s {
-            self.t.s = stamp;
         }
         self.d.push_back(m.clone());
         if self.d.len() as i64 > self.s {
@@ -84,7 +78,33 @@ impl DynamicSampler {
         }
         false
     }
-    fn set_unique(self: &mut DynamicSampler, q: i64, m: metric::Metric) -> Result<bool, Box<EvalAltResult>> {
+    fn timestamp_interval(self: &mut DynamicSampler) -> Result<timestamp::TimeInterval, Box<EvalAltResult>> {
+        let mut s: i64 = i64::MAX;
+        let mut e: i64 = 0;
+        if self.len() <= 2 {
+            return Err("DynamicSampler() do not have enough data for DynamicSampler().timestamp_interval()".into());
+        }
+        for n in self.d.iter() {
+            let t: i64 = timestamp::timestamp_module::whole_seconds(n.timestamp) as i64;
+            if t < s {
+                s = t;
+            }
+            if t > e {
+                e = t
+            }
+        }
+        if s == e {
+            return Err("DynamicSampler() can not have start and end of the interval same for DynamicSampler().timestamp_interval()".into());
+        }
+        let mut res = timestamp::TimeInterval::new();
+        res.s = s;
+        res.e = e;
+        return Ok(res);
+    }
+    fn set_unique_q_int(self: &mut DynamicSampler, q: i64, m: metric::Metric) -> Result<bool, Box<EvalAltResult>> {
+        self.set_unique_q_float(q as f64, m.clone())
+    }
+    fn set_unique_q_float(self: &mut DynamicSampler, q: f64, m: metric::Metric) -> Result<bool, Box<EvalAltResult>> {
         let value = match m.clone().get_value() {
             Ok(data) => data,
             Err(_) => {
@@ -93,7 +113,7 @@ impl DynamicSampler {
         };
         if value.is_string() {
             let s_value = value.into_string();
-            let mut curr_q = 0;
+            let mut curr_q: f64 = 0.0;
             for n in self.d.iter() {
                 let value2 = match n.clone().get_value() {
                     Ok(data) => data,
@@ -101,7 +121,7 @@ impl DynamicSampler {
                         return Err(format!("Can not get value for DynamicSampler().set_unique()").into());
                     }
                 };
-                let c = string::fuzzy::str_match_levenshtein_raw(s_value.clone().unwrap(), value2.into_string().unwrap());
+                let c = string::fuzzy::str_match_levenshtein_raw(s_value.clone().unwrap(), value2.into_string().unwrap()) as f64;
                 if c > curr_q {
                     curr_q = c;
                 }
@@ -113,6 +133,25 @@ impl DynamicSampler {
             return Err(format!("Datatype stored in Metric() is not suitable for DynamicSampler().set_unique()").into());
         }
         Ok(true)
+    }
+    fn to_sampler(self: &mut DynamicSampler) -> Result<sampler::Sampler, Box<EvalAltResult>> {
+        if self.len() == 0 {
+            return Err("DynamicSampler() is empty".into());
+        }
+        let mut s = sampler::Sampler::init_no_ts();
+        for n in self.d.iter() {
+            let value = match n.clone().get_value() {
+                Ok(data) => data,
+                Err(_) => return Err("Can not get value for DynamicSampler()".into()),
+            };
+            match s.set_and_ts_raw(value.clone(), n.timestamp) {
+                Ok(_) => {}
+                Err(err) => {
+                    return Err(format!("{:?}", err).into());
+                }
+            }
+        }
+        return Ok(s);
     }
 }
 
@@ -130,8 +169,11 @@ pub fn init(engine: &mut Engine) {
           .register_fn("values", DynamicSampler::values)
           .register_fn("len", DynamicSampler::len)
           .register_fn("set", DynamicSampler::set)
-          .register_fn("set_unique", DynamicSampler::set_unique)
+          .register_fn("set_unique", DynamicSampler::set_unique_q_int)
+          .register_fn("set_unique", DynamicSampler::set_unique_q_float)
           .register_fn("is_timestamp", DynamicSampler::is_timestamp)
+          .register_fn("timestamp_interval", DynamicSampler::timestamp_interval)
+          .register_fn("to_sampler", DynamicSampler::to_sampler)
           .register_fn("to_string", |x: &mut DynamicSampler| format!("DynamicSampler().len() = {}", x.len()));
 
     let module = exported_module!(dynamicsampler_module);
