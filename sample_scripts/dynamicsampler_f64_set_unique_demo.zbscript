@@ -1,0 +1,16 @@
+let m1 = Metric("zbus/metric/v1/local/home.lan/pi")
+        .value(3.14)
+        .tag("DOMAIN", "MATH");
+let m2 = Metric("zbus/metric/v1/local/home.lan/pi")
+        .value(3.14)
+        .tag("DOMAIN", "MATH");
+let ds = DynamicSampler();
+if ds.set_unique(1, m1) {
+  print("DynamicSampler.set_unique() is success");
+}
+if ! ds.set_unique(0.1, m2) {
+  print("DynamicSampler.set_unique() for the same data  is failure");
+}
+print("DynamicSampler() "+ds);
+print("DynamicSampler().data() "+ds.data());
+print("DynamicSampler().values() "+ds.values());

@@ -3,7 +3,7 @@ use rhai::{Engine, EvalAltResult, Dynamic, Array};
 use rhai::plugin::*;
 use std::collections::VecDeque;
 
-use crate::zbus_lib::{timestamp, metric, string, sampler};
+use crate::zbus_lib::{timestamp, metric, string, sampler, interval};
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -112,7 +112,7 @@ impl DynamicSampler {
             }
         };
         if value.is_string() {
-            let s_value = value.into_string();
+            let s_value = value.clone().into_string();
             let mut curr_q: f64 = 0.0;
             for n in self.d.iter() {
                 let value2 = match n.clone().get_value() {
@@ -129,10 +129,26 @@ impl DynamicSampler {
             if curr_q < q {
                 return Ok(self.set(m.clone()));
             }
+        } if value.is_float() {
+            let v: f64 = value.as_float().unwrap();
+            for n in self.d.iter() {
+                let n_value = match n.clone().get_value() {
+                    Ok(data) => data,
+                    Err(_) => {
+                        return Err(format!("Can not get value for DynamicSampler().set_unique()").into());
+                    }
+                };
+                if n_value.is_float() {
+                    let mut i = interval::fn_make_observational_error_interval(n_value.as_float().unwrap(), q);
+                    if i.contains_in(v) {
+                        return Ok(false);
+                    }
+                }
+            }
+            return Ok(self.set(m.clone()));
         } else {
             return Err(format!("Datatype stored in Metric() is not suitable for DynamicSampler().set_unique()").into());
         }
-        Ok(true)
     }
     fn to_sampler(self: &mut DynamicSampler) -> Result<sampler::Sampler, Box<EvalAltResult>> {
         if self.len() == 0 {

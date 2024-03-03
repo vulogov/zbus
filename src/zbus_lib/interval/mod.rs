@@ -43,7 +43,7 @@ impl Interval {
     fn magnitude(self: &mut Interval) -> f64 {
         self.i.mag()
     }
-    fn contains_in(self: &mut Interval, n: f64) -> bool {
+    pub fn contains_in(self: &mut Interval, n: f64) -> bool {
         self.i.contains(n)
     }
     fn within(self: &mut Interval, n: f64) -> bool {
