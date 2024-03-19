@@ -181,3 +181,9 @@ zbus script --eval "print(ARGV)"  -- 1 2 3
 ```
 
 The arguments will be passed to global variable ARGV in ZB-script engine.
+
+## Examples of integration of zbus with
+
+* [Vector pipeline tool](./example/vector)
+* [Zenoh daemon](./example/zenohd)
+* [Zabbix Agent](./example/zabbix_agent)

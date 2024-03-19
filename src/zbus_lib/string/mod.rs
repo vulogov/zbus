@@ -8,7 +8,7 @@ use crate::zbus_lib::grok;
 mod zip;
 mod includes;
 mod eval;
-mod fuzzy;
+pub mod fuzzy;
 mod tokens;
 mod tokens_text;
 mod text_text;

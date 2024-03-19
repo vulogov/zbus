@@ -1,0 +1,8 @@
+let m = Metric("zbus/metric/v1/local/home.lan/pi")
+        .value(3.14)
+        .tag("DOMAIN", "MATH");
+let ds = DynamicSampler();
+ds.set(m);
+print("DynamicSampler() "+ds);
+print("DynamicSampler().data() "+ds.data());
+print("DynamicSampler().values() "+ds.values());

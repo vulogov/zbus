@@ -1,0 +1,13 @@
+api:
+    enabled: false
+
+sources:
+  standard_input:
+    type: "stdin"
+
+sinks:
+  to_console:
+    type: "console"
+    inputs: [ "standard_input" ]
+    encoding:
+      codec: "json"

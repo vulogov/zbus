@@ -43,8 +43,11 @@ impl Interval {
     fn magnitude(self: &mut Interval) -> f64 {
         self.i.mag()
     }
-    fn contains_in(self: &mut Interval, n: f64) -> bool {
+    pub fn contains_in(self: &mut Interval, n: f64) -> bool {
         self.i.contains(n)
+    }
+    fn within(self: &mut Interval, n: f64) -> bool {
+        n >= self.lower() && n <= self.upper()
     }
     fn less(self: &mut Interval, other: Interval) -> bool {
         self.i.less(other.i)
@@ -93,7 +96,14 @@ impl Interval {
     }
 }
 
+pub fn fn_make_observational_error_interval(d: f64, q: f64) -> Interval {
+    let q_delta = (d*q)/2.0;
+    Interval::new(d-q_delta, d+q_delta)
+}
 
+pub fn make_observational_error_interval(_context: NativeCallContext, d: f64, q: f64) -> Result<Interval, Box<EvalAltResult>> {
+    Ok(fn_make_observational_error_interval(d,q))
+}
 
 #[export_module]
 pub mod interval_module {
@@ -125,8 +135,10 @@ pub fn init(engine: &mut Engine) {
           .register_fn("floor", Interval::interval_floor)
           .register_fn("min", Interval::interval_min)
           .register_fn("max", Interval::interval_max)
+          .register_fn("within", Interval::within)
           .register_fn("to_string", |x: &mut Interval| format!("Interval({}:{})", x.lower(), x.upper()) );
 
-    let module = exported_module!(interval_module);
+    let mut module = exported_module!(interval_module);
+    module.set_native_fn("observation_error", make_observational_error_interval);
     engine.register_static_module("interval", module.into());
 }

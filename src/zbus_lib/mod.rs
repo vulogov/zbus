@@ -18,6 +18,7 @@ pub mod neuralnet;
 pub mod interval;
 pub mod grok;
 pub mod sampler;
+pub mod dynamicsampler;
 pub mod metric;
 pub mod input;
 pub mod filters;
@@ -42,7 +43,8 @@ pub fn run_zbus_script(script: String, c: &cmd::Cli, s: &cmd::Script) {
          .push("ZBUS_PROTOCOL_VERSION", Dynamic::from(c.protocol_version.clone()))
          .push("PLATFORM_NAME", Dynamic::from(c.platform_name.clone()))
          .push("ZBUS_ADDRESS", Dynamic::from(c.bus.clone()))
-         .push("API_ENDPOINT", Dynamic::from(s.endpoint.clone()));
+         .push("API_ENDPOINT", Dynamic::from(s.endpoint.clone()))
+         .push("PIPELINE_TOOL", Dynamic::from("NONE".to_string()));
     initscope(&mut scope);
     initlib(&mut engine, c);
     match engine.run_with_scope(&mut scope, script.as_str()) {
@@ -74,7 +76,8 @@ pub fn run_zbus_script_no_cli(script: String, label: String) {
          .push("ZBUS_PROTOCOL_VERSION", Dynamic::from("v1"))
          .push("PLATFORM_NAME", Dynamic::from(""))
          .push("ZBUS_ADDRESS", Dynamic::from(""))
-         .push("API_ENDPOINT", Dynamic::from(""));
+         .push("API_ENDPOINT", Dynamic::from(""))
+         .push("PIPELINE_TOOL", Dynamic::from("NONE".to_string()));
     initscope(&mut scope);
     initlib_no_cli(&mut engine);
     match engine.run_with_scope(&mut scope, script.as_str()) {
@@ -117,6 +120,7 @@ fn initlib_no_cli_required(engine: &mut Engine)  {
     timestamp::init(engine);
     interval::init(engine);
     sampler::init(engine);
+    dynamicsampler::init(engine);
     metric::init(engine);
     system::init(engine);
     input::init(engine);
