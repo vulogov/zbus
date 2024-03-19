@@ -1,0 +1,14 @@
+let m1 = Metric("zbus/metric/v1/local/home.lan/value")
+        .value(1.0);
+let m2 = Metric("zbus/metric/v1/local/home.lan/value")
+        .value(2.0);
+let ds = DynamicSampler();
+ds.set(m1);
+if ! ds.set(m2) {
+  print("Something wrong");
+}
+let s = ds.to_sampler();
+print("DynamicSampler() "+ds);
+print("DynamicSampler().data() "+ds.data());
+print("Sampler() made out of DynamicSampler() "+s);
+print("Sampler.data() "+s.data());

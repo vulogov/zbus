@@ -8,8 +8,6 @@ use crate::zbus_lib;
 pub fn run(c: &cmd::Cli, pipeline: &cmd::Pipeline, fan: &cmd::PipelineFan, zc: Config)  {
     log::trace!("zbus_pipeline_fan::run() reached");
 
-    println!("{:?}", &fan.pipeline);
-
     if fan.pipeline.len() == 0 {
         log::error!("You did not specified pipeline names for a fan pipeline");
         return;
@@ -30,12 +28,12 @@ pub fn run(c: &cmd::Cli, pipeline: &cmd::Pipeline, fan: &cmd::PipelineFan, zc: C
     zbus_lib::bus::channel::pipes_init();
 
     if pipeline.group.stdin {
-        cmd::zbus_pipeline::run_zbus_script_for_pipeline(getfile::get_file_from_stdin(), c, argv)
+        cmd::zbus_pipeline::run_zbus_script_for_pipeline(getfile::get_file_from_stdin(), "FAN".to_string(), c, argv)
     } else {
         match &pipeline.group.file {
             Some(script_name) => {
                 match getfile::get_file_from_file(script_name.trim().to_string()) {
-                    Some(script) => cmd::zbus_pipeline::run_zbus_script_for_pipeline(script, c, argv),
+                    Some(script) => cmd::zbus_pipeline::run_zbus_script_for_pipeline(script, "FAN".to_string(), c, argv),
                     None => log::error!("Script is empty"),
                 }
             }
@@ -43,12 +41,12 @@ pub fn run(c: &cmd::Cli, pipeline: &cmd::Pipeline, fan: &cmd::PipelineFan, zc: C
                 match &pipeline.group.url {
                     Some(script_name) => {
                         match getfile::get_file_from_uri(script_name.trim().to_string()) {
-                            Some(script) => cmd::zbus_pipeline::run_zbus_script_for_pipeline(script, c, argv),
+                            Some(script) => cmd::zbus_pipeline::run_zbus_script_for_pipeline(script, "FAN".to_string(), c, argv),
                             None => log::error!("Script is empty"),
                         }
                     }
                     None => {
-                        cmd::zbus_pipeline::run_zbus_script_for_pipeline(getfile::get_file_from_stdin(), c, argv);
+                        cmd::zbus_pipeline::run_zbus_script_for_pipeline(getfile::get_file_from_stdin(), "FAN".to_string(), c, argv);
                     }
                 }
             }

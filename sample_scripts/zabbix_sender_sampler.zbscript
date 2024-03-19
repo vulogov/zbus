@@ -1,8 +1,18 @@
+//
+// Populate Sampler() with Triangle distribution
+// raise_duration = 3, fall_duration = 3, high_value = 1.0, low_value=1.0, delay=1
+//
 let data = sampler::Triangle(3, 3, 0.0, 1.0, 1);
+//
+// Prepare ZabbixSender() object
+//
 let sender = ZabbixSender("192.168.86.29:10051");
+//
+// Regenerate timestamps of the sample from current timestamp back every 15 seconds
+//
 let data = data.distribute_timestamps(15);
+//
+// Send data in Sampler() to Zabbix trapper item
+//
 let res = sender.send("test_host", "test_item_float2", data);
 print("Result of ZabbixSender::send() is "+res);
-// for v in data.values() {
-//   sender.send("test_host", "test_item_float2", v[0], v[1]);
-// }

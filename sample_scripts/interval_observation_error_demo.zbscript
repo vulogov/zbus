@@ -1,0 +1,5 @@
+let i = interval::observation_error(3.14, 0.1);
+print("Observation error for 3.14 with quantum 0.1 is "+i);
+print("Value 3.0 is within error margin: "+i.contains(3.0));
+print("Value 3.2 is within error margin: "+i.contains(3.2));
+print("Value 2.5 is within error margin: "+i.contains(2.5));

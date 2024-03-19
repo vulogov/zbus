@@ -1,0 +1,31 @@
+{
+  adminspace: {
+    permissions: {
+      read: true,
+      write: true,
+    },
+  },
+  metadata: {
+    name: "node1",
+    location: "zbus",
+  },
+  connect: {
+    endpoints: [
+
+    ],
+  },
+  plugins: {
+    storage_manager: {
+      __path__: [
+          "/usr/local/lib/libzenoh_plugin_storage_manager.so",
+          "/usr/local/lib/libzenoh_plugin_storage_manager.dylib",
+      ],
+      storages: {
+        zbus: {
+          key_expr:"zbus/**",
+          volume:"memory",
+        },
+      },
+    },
+  },
+}
