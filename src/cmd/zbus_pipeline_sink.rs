@@ -13,7 +13,7 @@ pub fn run(c: &cmd::Cli, pipeline: &cmd::Pipeline, sink: &cmd::PipelineSink, zc:
         argv.push(Dynamic::from(v));
     }
 
-cmd::zbus_pipeline_lib::pipeline_bus_channel("in".to_string(), sink.pipeline.clone(), c.clone(), zc);
+    cmd::zbus_pipeline_lib::pipeline_bus_channel("in".to_string(), sink.pipeline.clone(), c.clone(), zc);
     zbus_lib::bus::channel::pipes_init();
 
     if pipeline.group.stdin {
