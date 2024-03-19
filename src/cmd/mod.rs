@@ -29,6 +29,7 @@ pub mod zbus_pipeline_processor;
 pub mod zbus_pipeline_sink;
 pub mod zbus_pipeline_aggregator;
 pub mod zbus_pipeline_fan;
+pub mod zbus_pipeline_vector;
 pub mod zbus_pipeline_lib;
 pub mod zbus_script;
 pub mod zbus_query_raw;
@@ -219,6 +220,7 @@ enum PipelineCommands {
     Sink(PipelineSink),
     Fan(PipelineFan),
     Aggregator(PipelineAggregator),
+    Vector(PipelineVector),
 }
 
 #[derive(Args, Clone, Debug)]
@@ -302,6 +304,17 @@ pub struct PipelineArgGroup {
 
     #[clap(short, long, help="Filename of the file with pipeline code")]
     file: Option<String>,
+
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Run internal processing")]
+    pub internal: bool,
+}
+
+#[derive(Debug, Clone, clap::Args)]
+#[group(required = true, multiple = false)]
+pub struct PipelineVectorGroup {
+    #[clap(long, action = clap::ArgAction::SetTrue, help="Send data to VECTOR stdin source")]
+    pub stdout: bool,
+
 }
 
 #[derive(Args, Clone, Debug)]
@@ -365,6 +378,16 @@ pub struct PipelineAggregator {
 
     #[clap(last = true)]
     pub args: Vec<String>,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Pipeline to a VECTOR ")]
+pub struct PipelineVector {
+    #[clap(help="Input pipelines name", long)]
+    pub pipeline_in: String,
+
+    #[clap(flatten)]
+    group: PipelineVectorGroup,
 }
 
 #[derive(Args, Clone, Debug)]
