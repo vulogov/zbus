@@ -21,11 +21,14 @@ mod distributions;
 pub mod tsf;
 pub mod forecast_oscillator;
 pub mod markov;
+pub mod consistent;
 
 #[derive(Debug, Clone)]
 pub struct Sampler {
     d: VecDeque<f64>,
     s: VecDeque<f64>,
+    n: i64,
+    q: f64,
     tsf: TSF,
     fosc: FOSC,
     tsf_next: f64,
@@ -41,6 +44,8 @@ impl Sampler {
             fosc: FOSC::new(8),
             tsf_next: 0.0 as f64,
             fosc_next: 0.0 as f64,
+            n: 0 as i64,
+            q: 0.01 as f64,
         }
     }
     pub fn init() -> Sampler {
@@ -356,6 +361,9 @@ pub fn init(engine: &mut Engine) {
           .register_fn("equal", Sampler::try_equal)
           .register_fn("harmonic", Sampler::harmonic)
           .register_fn("markov", Sampler::markov)
+          .register_fn("n", Sampler::n_get)
+          .register_fn("n", Sampler::n_set)
+          .register_fn("q", Sampler::q_set)
           .register_fn("distribute_timestamps", Sampler::distribute_timestamps)
           .register_fn("distribute_timestamps", Sampler::distribute_from_current_timestamp)
           .register_fn("to_string", |x: &mut Sampler| format!("{:?}", x.d) );
