@@ -1,0 +1,25 @@
+let data = EmptySampler();
+data.n(2);
+
+if ! data.set_consistent(1.0) {
+  print("We are analyzing consistency with just a two values. First submission returns false is expected");
+}
+
+if data.set_consistent(1.0) {
+  print("And with second submission of the value within "+data.q()+" deviation Sampler reached consistency");
+}
+print("Data sample consistency is: "+data.consistency());
+
+let data = EmptySampler();
+data.n(2);
+
+print("Now we will feed Sampler() with inconsistent data");
+
+if ! data.set_consistent(1.0) {
+  print("We are analyzing consistency with just a two values. First submission returns false is expected");
+}
+
+if ! data.set_consistent(5.0) {
+  print("And with second submission of the value outside "+data.q()+" deviation Sampler is still inconsistent");
+}
+print("Data sample consistency is: "+data.consistency());

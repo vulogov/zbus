@@ -364,6 +364,9 @@ pub fn init(engine: &mut Engine) {
           .register_fn("n", Sampler::n_get)
           .register_fn("n", Sampler::n_set)
           .register_fn("q", Sampler::q_set)
+          .register_fn("q", Sampler::q_get)
+          .register_fn("set_consistent", Sampler::set_consistent)
+          .register_fn("consistency", Sampler::consistency)
           .register_fn("distribute_timestamps", Sampler::distribute_timestamps)
           .register_fn("distribute_timestamps", Sampler::distribute_from_current_timestamp)
           .register_fn("to_string", |x: &mut Sampler| format!("{:?}", x.d) );
