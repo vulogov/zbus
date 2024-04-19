@@ -1,0 +1,23 @@
+let data = EmptySampler();
+data.n(2);
+data.q(0.6);
+
+if ! data.set_inconsistent(1.0) {
+  print("We are analyzing consistency with just a two values. First submission returns false is expected");
+}
+
+if data.set_inconsistent(2.0) {
+  print("And with second submission of the value within "+data.q()+" deviation Sampler reached maturity");
+}
+
+if ! data.set_inconsistent(1.0) {
+  print("And with third submission of the value within "+data.q()+" deviation Sampler reached consistency and not accepted");
+}
+
+if data.set_inconsistent(15.0) {
+  print("And with fourth submission of the value within "+data.q()+" deviation Sampler reaches inconsistency and passed sample.");
+  print("But this is an ALERT!");
+}
+
+
+print("Data sample consistency is: "+data.consistency());

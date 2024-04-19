@@ -22,6 +22,7 @@ pub mod tsf;
 pub mod forecast_oscillator;
 pub mod markov;
 pub mod consistent;
+pub mod inconsistent;
 
 #[derive(Debug, Clone)]
 pub struct Sampler {
@@ -366,6 +367,7 @@ pub fn init(engine: &mut Engine) {
           .register_fn("q", Sampler::q_set)
           .register_fn("q", Sampler::q_get)
           .register_fn("set_consistent", Sampler::set_consistent)
+          .register_fn("set_inconsistent", Sampler::set_inconsistent)
           .register_fn("consistency", Sampler::consistency)
           .register_fn("distribute_timestamps", Sampler::distribute_timestamps)
           .register_fn("distribute_timestamps", Sampler::distribute_from_current_timestamp)
