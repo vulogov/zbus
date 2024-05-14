@@ -8,3 +8,4 @@ ZB-script new standard library features:
 * Sampler().q(value) - set the value for data consistency threshold
 * Sampler().set_consistent(value) - set the data in the sampler and return true or false. True, if the data in the Sampler() is consistent.
 * Sampler().consistency() - return the computed consistency of the data (standard deviation).
+* Sampler().set_inconsistent() - set the data into Sampler only if the data is inconsistent with previously submitted data. First n samples accepted without that check to establish baseline.

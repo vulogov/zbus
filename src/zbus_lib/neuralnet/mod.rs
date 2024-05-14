@@ -4,6 +4,8 @@ use maver::*;
 use rhai::{Engine, Array};
 use rhai::plugin::*;
 
+pub mod samplernn;
+
 fn array2vec(s: Array) -> Vec<f64> {
     let mut res: Vec<f64> = Vec::new();
     for v in s {
@@ -33,16 +35,18 @@ pub struct NRNeuralNetwork {
     epoch:  usize,
     shuffle: bool,
     rate:    f64,
+    pub is_trained: bool,
 }
 
 impl NRNeuralNetwork {
     fn new() -> Self {
         Self {
-            nn:     NeuralNetwork::new(vec![2,2,1],Activation::Tanh,Activation::Tanh),
-            train:  Vec::new(),
-            epoch:  1000 as usize,
-            shuffle: false,
-            rate:    0.01 as f64,
+            nn:         NeuralNetwork::new(vec![2,2,1],Activation::Tanh,Activation::Tanh),
+            train:      Vec::new(),
+            epoch:      1000 as usize,
+            shuffle:    false,
+            rate:       0.01 as f64,
+            is_trained: false,
         }
     }
     pub fn init(i: i64, o: i64, h: i64) -> NRNeuralNetwork {
@@ -56,6 +60,7 @@ impl NRNeuralNetwork {
         self.train.push((data, cls));
     }
     fn train(&mut self) {
+        self.is_trained = true;
         self.nn.train(self.epoch, self.shuffle, self.train.clone(), Some(self.rate));
     }
     fn forward(&mut self, d: Array) -> Array {
@@ -74,12 +79,14 @@ pub mod nn_module {
 
 pub fn init(engine: &mut Engine) {
     log::trace!("Running STDLIB::neuralnet init");
-    let module = exported_module!(nn_module);
+    let mut module = exported_module!(nn_module);
+    module.set_native_fn("SamplerAnalyzer", samplernn::new_sampler_nn);
     engine.register_static_module("neuralnet", module.into());
     engine.register_type::<NRNeuralNetwork>()
           .register_fn("NeuralNet", NRNeuralNetwork::init)
           .register_fn("add", NRNeuralNetwork::add)
           .register_fn("train", NRNeuralNetwork::train)
           .register_fn("forward", NRNeuralNetwork::forward)
+          .register_fn("analyze", NRNeuralNetwork::analyze)
           .register_fn("to_string", |x: &mut NRNeuralNetwork| format!("{:?}", x.nn) );
 }
