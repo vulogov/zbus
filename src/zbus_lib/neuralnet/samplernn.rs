@@ -4,8 +4,8 @@ use crate::zbus_lib::neuralnet;
 use crate::zbus_lib::sampler::Sampler;
 use rhai::{NativeCallContext, EvalAltResult};
 
-fn train_flat_curve(nn: &mut neuralnet::NRNeuralNetwork) {
-    
+fn train_flat_curve(_nn: &mut neuralnet::NRNeuralNetwork) {
+
 }
 
 pub fn new_sampler_nn(_context: NativeCallContext) -> Result<neuralnet::NRNeuralNetwork, Box<EvalAltResult>> {

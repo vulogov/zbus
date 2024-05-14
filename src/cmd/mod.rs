@@ -26,6 +26,8 @@ pub mod zbus_pipeline;
 pub mod zbus_pipeline_generator;
 pub mod zbus_pipeline_feeder;
 pub mod zbus_pipeline_processor;
+pub mod zbus_pipeline_shell;
+pub mod zbus_pipeline_command;
 pub mod zbus_pipeline_sink;
 pub mod zbus_pipeline_aggregator;
 pub mod zbus_pipeline_fan;
@@ -56,6 +58,8 @@ pub fn init() {
                 return;
             }
         }
+    } else {
+        log::debug!("Multicast discovery enabled");
     }
     match EndPoint::from_str(&cli.bus) {
         Ok(zconn) => {
@@ -221,6 +225,8 @@ enum PipelineCommands {
     Fan(PipelineFan),
     Aggregator(PipelineAggregator),
     Vector(PipelineVector),
+    Shell(PipelineShell),
+    Command(PipelineCommand),
 }
 
 #[derive(Args, Clone, Debug)]
@@ -388,6 +394,28 @@ pub struct PipelineVector {
 
     #[clap(flatten)]
     group: PipelineVectorGroup,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Execute shell command on pipeline")]
+pub struct PipelineShell {
+    #[clap(help="Output pipeline name", long)]
+    pub pipeline: String,
+    #[clap(help="Input pipeline name", long)]
+    pub pipeline_in: String,
+
+    #[clap(last = true)]
+    pub args: Vec<String>,
+}
+
+#[derive(Args, Clone, Debug)]
+#[clap(about="Send command to ZBUS pipeline")]
+pub struct PipelineCommand {
+    #[clap(help="Output pipeline name", long)]
+    pub pipeline: String,
+
+    #[clap(last = true)]
+    pub args: Vec<String>,
 }
 
 #[derive(Args, Clone, Debug)]

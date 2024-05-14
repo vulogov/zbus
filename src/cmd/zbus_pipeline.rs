@@ -12,7 +12,7 @@ use zenoh::config::{Config};
 
 use crate::zbus_lib;
 use crate::cmd;
-use crate::cmd::{zbus_pipeline_vector, zbus_pipeline_feeder, zbus_pipeline_generator, zbus_pipeline_processor, zbus_pipeline_sink, zbus_pipeline_aggregator, zbus_pipeline_fan};
+use crate::cmd::{zbus_pipeline_command, zbus_pipeline_shell, zbus_pipeline_vector, zbus_pipeline_feeder, zbus_pipeline_generator, zbus_pipeline_processor, zbus_pipeline_sink, zbus_pipeline_aggregator, zbus_pipeline_fan};
 
 pub fn run_zbus_script_for_pipeline(script: String, tool: String, c: &cmd::Cli, argv: Vec<Dynamic>) {
     log::trace!("Execiting ZBUS scriptfor pipeline len()={}", &script.len());
@@ -68,6 +68,12 @@ pub fn run(c: &cmd::Cli, pipeline: &cmd::Pipeline, zc: Config)  {
         }
         cmd::PipelineCommands::Vector(vector) => {
             zbus_pipeline_vector::run(c, pipeline, vector, zc)
+        }
+        cmd::PipelineCommands::Shell(shell) => {
+            zbus_pipeline_shell::run(c, pipeline, shell, zc)
+        }
+        cmd::PipelineCommands::Command(command) => {
+            zbus_pipeline_command::run(c, pipeline, command, zc)
         }
     }
 }
